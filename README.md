@@ -180,6 +180,9 @@ This library listens for incoming serial data in the Falcon BMS shared memory fo
 
 Created by [Bacon8tor](https://github.com/Bacon8tor)
 
----
+```cpp
+bms.getDEDLines(0);  // Request line 0
+Serial.println(bms.dedLines[0]);
+```
 
 Contributions welcome! Feel free to fork and submit PRs or issues.
