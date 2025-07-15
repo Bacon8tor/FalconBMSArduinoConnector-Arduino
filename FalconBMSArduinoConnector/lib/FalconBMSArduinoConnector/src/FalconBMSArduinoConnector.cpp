@@ -1,0 +1,336 @@
+#include "FalconBMSArduinoConnector.h"
+
+FalconBMSArduinoConnector::FalconBMSArduinoConnector()
+  : lightBits(0), lightBits2(0), idx(0), isReading(false), connected(false), lastSerialActivity(0), _serial(&Serial) {
+  memset(_bits, 0, sizeof(_bits));
+}
+
+void FalconBMSArduinoConnector::begin(HardwareSerial& serial, uint32_t baud) {
+  _serial = &serial;
+  _serial->begin(baud);
+  while (!_serial);
+  _serial->println("READY");
+}
+
+void FalconBMSArduinoConnector::update() {
+    _serial->println("READY");
+    delay(10);
+    // getLightBits("lb");
+    // delay(10);
+    // getLightBits("lb2");
+    // delay(10);
+    // getLightBits("lb3");
+    // delay(10);
+    // getDEDLines();
+    
+  if (connected && (millis() - lastSerialActivity > timeoutMs)) {
+    connected = false;
+  }
+}
+
+void FalconBMSArduinoConnector::getLightBits(String bits){
+  _serial->println(bits);
+  while (_serial->available()) {
+    uint8_t b = _serial->read();
+
+    if (!isReading) {
+      if (b == 0xAA) {
+        isReading = true;
+        idx = 0;
+      }
+      continue;
+    }
+
+    buffer[idx++] = b;
+
+    if (idx >= 2) {
+      uint8_t expectedLen = buffer[1];
+      if (idx == 2 + expectedLen + 1) {
+        uint8_t type = buffer[0];
+        uint8_t len = buffer[1];
+        uint8_t* data = &buffer[2];
+        uint8_t checksum = buffer[2 + len];
+
+        uint8_t sum = type + len;
+        for (int i = 0; i < len; i++) sum += data[i];
+
+        if (checksum == (sum & 0xFF)) {
+          handlePacket(type, data, len);
+        }
+
+        isReading = false;
+      }
+    }
+  }
+}
+
+void FalconBMSArduinoConnector::getDEDLines() {
+  _serial->println("DED");  // Or use Serial.write(0x55); if your PC expects a binary trigger
+
+  while (_serial->available()) {
+    uint8_t b = _serial->read();
+
+    if (!isReading) {
+      if (b == 0xAA) {
+        isReading = true;
+        idx = 0;
+      }
+      continue;
+    }
+
+    buffer[idx++] = b;
+
+    if (idx >= 2) {
+      uint8_t expectedLen = buffer[1];
+      if (idx == 2 + expectedLen + 1) {
+        uint8_t type = buffer[0];
+        uint8_t len = buffer[1];
+        uint8_t* data = &buffer[2];
+        uint8_t checksum = buffer[2 + len];
+
+        uint8_t sum = type + len;
+        for (int i = 0; i < len; i++) sum += data[i];
+
+        if (checksum == (sum & 0xFF)) {
+          if (type == 0x10 && len == 130) {
+            // DED lines packet
+            for (int i = 0; i < 5; i++) {
+              memcpy(dedLines[i], &data[i * 26], 26);
+              dedLines[i][26] = '\0';
+            }
+            connected = true;
+            lastSerialActivity = millis();
+          }
+        }
+
+        isReading = false;
+      }
+    }
+  }
+}
+
+
+bool FalconBMSArduinoConnector::isConnected() {
+  return connected;
+}
+
+void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_t len) {
+  lastSerialActivity = millis();
+  connected = true;
+
+  if (type == 0x01 && len == 4) {
+    memcpy(&lightBits, data, 4);
+    checkLightBits();
+  } else if (type == 0x02 && len == 4) {
+    memcpy(&lightBits2, data, 4);
+    checkLightBits2();
+  }else if (type == 0x03 && len == 4) {
+    memcpy(&lightBits2, data, 4);
+    //checkLightBits2();
+  }
+}
+
+void FalconBMSArduinoConnector::checkLightBits() {
+  _bits[0] = lightBits & MasterCaution;
+  _bits[1] = lightBits & TF;
+  _bits[2] = lightBits & OXY_BROW;
+  _bits[3] = lightBits & EQUIP_HOT;
+  _bits[4] = lightBits & ONGROUND;
+  _bits[5] = lightBits & ENG_FIRE;
+  _bits[6] = lightBits & CONFIG;
+  _bits[7] = lightBits & HYD;
+  _bits[8] = lightBits & Flcs_ABCD;
+  _bits[9] = lightBits & FLCS;
+  _bits[10] = lightBits & CAN;
+  _bits[11] = lightBits & T_L_CFG;
+  _bits[12] = lightBits & AOAAbove;
+  _bits[13] = lightBits & AOAOn;
+  _bits[14] = lightBits & AOABelow;
+  _bits[15] = lightBits & RefuelRDY;
+  _bits[16] = lightBits & RefuelAR;
+  _bits[17] = lightBits & RefuelDSC;
+  _bits[18] = lightBits & FltControlSys;
+  _bits[19] = lightBits & LEFlaps;
+  _bits[20] = lightBits & EngineFault;
+  _bits[21] = lightBits & Overheat;
+  _bits[22] = lightBits & FuelLow;
+  _bits[23] = lightBits & Avionics;
+  _bits[24] = lightBits & RadarAlt;
+  _bits[25] = lightBits & IFF;
+  _bits[26] = lightBits & ECM;
+  _bits[27] = lightBits & Hook;
+  _bits[28] = lightBits & NWSFail;
+  _bits[29] = lightBits & CabinPress;
+  _bits[30] = lightBits & AutoPilotOn;
+  _bits[31] = lightBits & TFR_STBY;
+}
+
+void FalconBMSArduinoConnector::checkLightBits2() {
+  _bits2[0] = lightBits2 & HandOff;
+  _bits2[1] = lightBits2 & Launch;
+  _bits2[2] = lightBits2 & PriMode;
+  _bits2[3] = lightBits2 & Naval;
+  _bits2[4] = lightBits2 & Unk;
+  _bits2[5] = lightBits2 & TgtSep;
+  _bits2[6] = lightBits2 & Go;
+  _bits2[7] = lightBits2 & NoGo;
+  _bits2[8] = lightBits2 & Degr;
+  _bits2[9] = lightBits2 & Rdy;
+  _bits2[10] = lightBits2 & ChaffLo;
+  _bits2[11] = lightBits2 & FlareLo;
+  _bits2[12] = lightBits2 & AuxSrch;
+  _bits2[13] = lightBits2 & AuxAct;
+  _bits2[14] = lightBits2 & AuxLow;
+  _bits2[15] = lightBits2 & AuxPwr;
+  _bits2[16] = lightBits2 & EcmPwr;
+  _bits2[17] = lightBits2 & EcmFail;
+  _bits2[18] = lightBits2 & FwdFuelLow;
+  _bits2[19] = lightBits2 & AftFuelLow;
+  _bits2[20] = lightBits2 & EPUOn;
+  _bits2[21] = lightBits2 & JFSOn;
+  _bits2[22] = lightBits2 & SEC;
+  _bits2[23] = lightBits2 & OXY_LOW;
+  _bits2[24] = lightBits2 & PROBEHEAT;
+  _bits2[25] = lightBits2 & SEAT_ARM;
+  _bits2[26] = lightBits2 & BUC;
+  _bits2[27] = lightBits2 & FUEL_OIL_HOT;
+  _bits2[28] = lightBits2 & ANTI_SKID;
+  _bits2[29] = lightBits2 & TFR_ENGAGED;
+  _bits2[30] = lightBits2 & GEARHANDLE;
+  _bits2[31] = lightBits2 & ENGINE;
+}
+
+void FalconBMSArduinoConnector::checkLightBits3() {
+  _bits3[0]  = lightBits3 & FlcsPmg;
+  _bits3[1]  = lightBits3 & MainGen;
+  _bits3[2]  = lightBits3 & StbyGen;
+  _bits3[3]  = lightBits3 & EpuGen;
+  _bits3[4]  = lightBits3 & EpuPmg;
+  _bits3[5]  = lightBits3 & ToFlcs;
+  _bits3[6]  = lightBits3 & FlcsRly;
+  _bits3[7]  = lightBits3 & BatFail;
+  _bits3[8]  = lightBits3 & Hydrazine;
+  _bits3[9]  = lightBits3 & Air;
+  _bits3[10] = lightBits3 & Elec_Fault;
+  _bits3[11] = lightBits3 & Lef_Fault;
+  _bits3[12] = lightBits3 & OnGround3;
+  _bits3[13] = lightBits3 & FlcsBitRun;
+  _bits3[14] = lightBits3 & FlcsBitFail;
+  _bits3[15] = lightBits3 & DbuWarn;
+  _bits3[16] = lightBits3 & NoseGearDown;
+  _bits3[17] = lightBits3 & LeftGearDown;
+  _bits3[18] = lightBits3 & RightGearDown;
+  _bits3[19] = lightBits3 & ParkBrakeOn;
+  _bits3[20] = lightBits3 & Power_Off;
+  _bits3[21] = lightBits3 & Cadc;
+  _bits3[22] = lightBits3 & SpeedBrake;
+  _bits3[23] = lightBits3 & SysTest;
+  _bits3[24] = lightBits3 & MCAnnounced;
+  _bits3[25] = lightBits3 & MLGWOW;
+  _bits3[26] = lightBits3 & NLGWOW;
+  _bits3[27] = lightBits3 & ATF_Not_Engaged;
+  _bits3[28] = lightBits3 & Inlet_Icing;
+}
+
+// Individual accessors
+#define DEFINE_GETTER(name, index) bool FalconBMSArduinoConnector::name() { return _bits[index]; }
+
+DEFINE_GETTER(isMasterCaution, 0)
+DEFINE_GETTER(isTF, 1)
+DEFINE_GETTER(isOxyBrow, 2)
+DEFINE_GETTER(isEquipHot, 3)
+DEFINE_GETTER(isOnGround, 4)
+DEFINE_GETTER(isEngFire, 5)
+DEFINE_GETTER(isConfig, 6)
+DEFINE_GETTER(isHyd, 7)
+DEFINE_GETTER(isFlcsABCD, 8)
+DEFINE_GETTER(isFlcs, 9)
+DEFINE_GETTER(isCan, 10)
+DEFINE_GETTER(isTLConfig, 11)
+DEFINE_GETTER(isAOAAbove, 12)
+DEFINE_GETTER(isAOAOn, 13)
+DEFINE_GETTER(isAOABelow, 14)
+DEFINE_GETTER(isRefuelRDY, 15)
+DEFINE_GETTER(isRefuelAR, 16)
+DEFINE_GETTER(isRefuelDSC, 17)
+DEFINE_GETTER(isFltControlSys, 18)
+DEFINE_GETTER(isLEFlaps, 19)
+DEFINE_GETTER(isEngineFault, 20)
+DEFINE_GETTER(isOverheat, 21)
+DEFINE_GETTER(isFuelLow, 22)
+DEFINE_GETTER(isAvionics, 23)
+DEFINE_GETTER(isRadarAlt, 24)
+DEFINE_GETTER(isIFF, 25)
+DEFINE_GETTER(isECM, 26)
+DEFINE_GETTER(isHook, 27)
+DEFINE_GETTER(isNWSFail, 28)
+DEFINE_GETTER(isCabinPress, 29)
+DEFINE_GETTER(isAutoPilotOn, 30)
+DEFINE_GETTER(isTFRSTBY, 31)
+
+#define DEFINE_GETTER2(name, index) bool FalconBMSArduinoConnector::name() { return _bits2[index]; }
+
+DEFINE_GETTER2(isHandOff, 0)
+DEFINE_GETTER2(isLaunch, 1)
+DEFINE_GETTER2(isPriMode, 2)
+DEFINE_GETTER2(isNaval, 3)
+DEFINE_GETTER2(isUnk, 4)
+DEFINE_GETTER2(isTgtSep, 5)
+DEFINE_GETTER2(isGo, 6)
+DEFINE_GETTER2(isNoGo, 7)
+DEFINE_GETTER2(isDegr, 8)
+DEFINE_GETTER2(isRdy, 9)
+DEFINE_GETTER2(isChaffLo, 10)
+DEFINE_GETTER2(isFlareLo, 11)
+DEFINE_GETTER2(isAuxSrch, 12)
+DEFINE_GETTER2(isAuxAct, 13)
+DEFINE_GETTER2(isAuxLow, 14)
+DEFINE_GETTER2(isAuxPwr, 15)
+DEFINE_GETTER2(isEcmPwr, 16)
+DEFINE_GETTER2(isEcmFail, 17)
+DEFINE_GETTER2(isFwdFuelLow, 18)
+DEFINE_GETTER2(isAftFuelLow, 19)
+DEFINE_GETTER2(isEPUOn, 20)
+DEFINE_GETTER2(isJFSOn, 21)
+DEFINE_GETTER2(isSEC, 22)
+DEFINE_GETTER2(isOxyLow, 23)
+DEFINE_GETTER2(isProbeHeat, 24)
+DEFINE_GETTER2(isSeatArm, 25)
+DEFINE_GETTER2(isBUC, 26)
+DEFINE_GETTER2(isFuelOilHot, 27)
+DEFINE_GETTER2(isAntiSkid, 28)
+DEFINE_GETTER2(isTFREngaged, 29)
+DEFINE_GETTER2(isGearHandle, 30)
+DEFINE_GETTER2(isEngine, 31)
+
+#define DEFINE_GETTER3(name, index) bool FalconBMSArduinoConnector::name() { return _bits3[index]; }
+
+DEFINE_GETTER3(isFlcsPmg, 0)
+DEFINE_GETTER3(isMainGen, 1)
+DEFINE_GETTER3(isStbyGen, 2)
+DEFINE_GETTER3(isEpuGen, 3)
+DEFINE_GETTER3(isEpuPmg, 4)
+DEFINE_GETTER3(isToFlcs, 5)
+DEFINE_GETTER3(isFlcsRly, 6)
+DEFINE_GETTER3(isBatFail, 7)
+DEFINE_GETTER3(isHydrazine, 8)
+DEFINE_GETTER3(isAir, 9)
+DEFINE_GETTER3(isElecFault, 10)
+DEFINE_GETTER3(isLefFault, 11)
+DEFINE_GETTER3(isOnGround3, 12)
+DEFINE_GETTER3(isFlcsBitRun, 13)
+DEFINE_GETTER3(isFlcsBitFail, 14)
+DEFINE_GETTER3(isDbuWarn, 15)
+DEFINE_GETTER3(isNoseGearDown, 16)
+DEFINE_GETTER3(isLeftGearDown, 17)
+DEFINE_GETTER3(isRightGearDown, 18)
+DEFINE_GETTER3(isParkBrakeOn, 19)
+DEFINE_GETTER3(isPowerOff, 20)
+DEFINE_GETTER3(isCadc, 21)
+DEFINE_GETTER3(isSpeedBrake, 22)
+DEFINE_GETTER3(isSysTest, 23)
+DEFINE_GETTER3(isMCAnnounced, 24)
+DEFINE_GETTER3(isMLGWOW, 25)
+DEFINE_GETTER3(isNLGWOW, 26)
+DEFINE_GETTER3(isATFNotEngaged, 27)
+DEFINE_GETTER3(isInletIcing, 28)
