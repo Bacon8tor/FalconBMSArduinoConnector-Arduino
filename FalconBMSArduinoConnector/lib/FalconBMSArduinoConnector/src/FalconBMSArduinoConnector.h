@@ -13,14 +13,14 @@ public:
   void begin(HardwareSerial& serial = Serial, uint32_t baud = 115200);
   void update();  // Call in loop()
   void getLightBits(String bits);
-  void getDEDLines();
+  void getDEDLines(int line);
 
   // Connection status
   bool isConnected();
 
   //DED
-  char dedLines[5][27]; // Global or class member (26 chars + null terminator)
-
+  String dedLines[5];
+  
   // Light bit getters
   bool isMasterCaution();
   bool isTF();
@@ -126,7 +126,7 @@ private:
   uint32_t lightBits2;
   uint32_t lightBits3;
   
-  uint8_t buffer[10];
+  uint8_t buffer[134];
   uint8_t idx;
   bool isReading;
   bool connected;

@@ -15,13 +15,22 @@ void FalconBMSArduinoConnector::begin(HardwareSerial& serial, uint32_t baud) {
 void FalconBMSArduinoConnector::update() {
     _serial->println("READY");
     delay(10);
-    // getLightBits("lb");
-    // delay(10);
-    // getLightBits("lb2");
-    // delay(10);
-    // getLightBits("lb3");
-    // delay(10);
-    // getDEDLines();
+    getLightBits("lb");
+    delay(10);
+    getLightBits("lb2");
+    delay(10);
+    getLightBits("lb3");
+    delay(10);
+    getDEDLines(0);
+    delay(10);
+    getDEDLines(1);
+    delay(10);
+    getDEDLines(2);
+    delay(10);
+    getDEDLines(3);
+    delay(10);
+    getDEDLines(4);
+    
     
   if (connected && (millis() - lastSerialActivity > timeoutMs)) {
     connected = false;
@@ -64,50 +73,17 @@ void FalconBMSArduinoConnector::getLightBits(String bits){
   }
 }
 
-void FalconBMSArduinoConnector::getDEDLines() {
-  _serial->println("DED");  // Or use Serial.write(0x55); if your PC expects a binary trigger
+void FalconBMSArduinoConnector::getDEDLines(int line) {
+  while (_serial->available()) _serial->read();  // flush input buffer
+  _serial->println("DED" + String(line)); //request dedline
 
-  while (_serial->available()) {
-    uint8_t b = _serial->read();
-
-    if (!isReading) {
-      if (b == 0xAA) {
-        isReading = true;
-        idx = 0;
-      }
-      continue;
-    }
-
-    buffer[idx++] = b;
-
-    if (idx >= 2) {
-      uint8_t expectedLen = buffer[1];
-      if (idx == 2 + expectedLen + 1) {
-        uint8_t type = buffer[0];
-        uint8_t len = buffer[1];
-        uint8_t* data = &buffer[2];
-        uint8_t checksum = buffer[2 + len];
-
-        uint8_t sum = type + len;
-        for (int i = 0; i < len; i++) sum += data[i];
-
-        if (checksum == (sum & 0xFF)) {
-          if (type == 0x10 && len == 130) {
-            // DED lines packet
-            for (int i = 0; i < 5; i++) {
-              memcpy(dedLines[i], &data[i * 26], 26);
-              dedLines[i][26] = '\0';
-            }
-            connected = true;
-            lastSerialActivity = millis();
-          }
-        }
-
-        isReading = false;
-      }
-    }
-  }
+  String ded_t = _serial->readStringUntil('\n');
+  ded_t.trim();
+  dedLines[line] = ded_t;
+  
 }
+
+
 
 
 bool FalconBMSArduinoConnector::isConnected() {
