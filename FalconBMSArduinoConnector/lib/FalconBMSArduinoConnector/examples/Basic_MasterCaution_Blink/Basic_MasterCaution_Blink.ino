@@ -22,9 +22,6 @@ void loop() {
   if (bms.isConnected()) {
     digitalWrite(ledPin, bms.isMasterCaution() ? HIGH : LOW); // CHECKS WHETHER isMasterCaution true or false then sets high or low 
     
-    //Get Any DED Line like 
-    //bms.dedLines[0];
-
   } else {
     digitalWrite(ledPin, LOW);
   }

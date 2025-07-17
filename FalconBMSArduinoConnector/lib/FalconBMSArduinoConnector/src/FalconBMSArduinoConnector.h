@@ -19,8 +19,8 @@ public:
   bool isConnected();
 
   //DED
-  String dedLines[5];
-  
+  //String dedLines[5];
+  char dedLines[5][27];
   // Light bit getters
   bool isMasterCaution();
   bool isTF();

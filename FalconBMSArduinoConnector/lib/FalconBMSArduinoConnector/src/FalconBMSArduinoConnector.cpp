@@ -10,21 +10,26 @@ void FalconBMSArduinoConnector::begin(HardwareSerial& serial, uint32_t baud) {
   _serial->begin(baud);
   while (!_serial);
   _serial->println("READY");
+  connected = true;
 }
-
+//changed
 void FalconBMSArduinoConnector::update() {
+  if (!connected && (millis() - lastSerialActivity > 1000)) {
     _serial->println("READY");
+    lastSerialActivity = millis();
+    connected = true;
+  }
     delay(10);
     getLightBits("lb");
     delay(10);
     getLightBits("lb2");
     delay(10);
     getLightBits("lb3");
-    delay(10);
+     delay(10);
     getDEDLines(0);
     delay(10);
     getDEDLines(1);
-    delay(10);
+   delay(10);
     getDEDLines(2);
     delay(10);
     getDEDLines(3);
@@ -38,7 +43,10 @@ void FalconBMSArduinoConnector::update() {
 }
 
 void FalconBMSArduinoConnector::getLightBits(String bits){
+  while (_serial->available()) _serial->read();  // flush input buffer
+
   _serial->println(bits);
+  delay(10);
   while (_serial->available()) {
     uint8_t b = _serial->read();
 
@@ -73,15 +81,49 @@ void FalconBMSArduinoConnector::getLightBits(String bits){
   }
 }
 
+//changes
 void FalconBMSArduinoConnector::getDEDLines(int line) {
-  while (_serial->available()) _serial->read();  // flush input buffer
-  _serial->println("DED" + String(line)); //request dedline
+  if (line < 0 || line >= 5) return;  // sanity check
 
-  String ded_t = _serial->readStringUntil('\n');
-  ded_t.trim();
-  dedLines[line] = ded_t;
-  
+  // Flush serial input buffer
+  while (_serial->available()) _serial->read();
+
+  delay(5);
+
+  // Send request: "DED0" to "DED4"
+  _serial->print("DED");
+  _serial->println(line);  // avoid String concatenation
+
+  delay(5);
+
+  // Read response up to 26 characters or until newline
+  int index = 0;
+  while (_serial->available()) {
+    char c = _serial->read();
+    if (c == '\n' || index >= 26) break;
+    dedLines[line][index++] = c;
+  }
+
+  dedLines[line][index] = '\0';  // null-terminate
+
+  // Optional: trim trailing whitespace
+  while (index > 0 && isspace(dedLines[line][index - 1])) {
+    dedLines[line][--index] = '\0';
+  }
 }
+
+// void FalconBMSArduinoConnector::getDEDLines(int line) {
+//   while (_serial->available()) _serial->read();  // flush input buffer
+//   delay(5);
+//   _serial->println("DED" + String(line)); //request dedline
+//   delay(5);
+//  String ded_t;
+//   if (_serial->available()) {
+//     ded_t = _serial->readStringUntil('\n');
+//     ded_t.trim();
+//     dedLines[line] = ded_t;
+//   }
+// }
 
 
 
