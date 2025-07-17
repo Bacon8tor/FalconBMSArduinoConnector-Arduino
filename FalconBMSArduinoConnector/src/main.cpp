@@ -89,6 +89,7 @@ void loop() {
     //   } while (u8g2.nextPage());
     // }
   }
+}
   else {
     digitalWrite(ledPin, LOW);
 
@@ -103,5 +104,8 @@ void loop() {
     }
   }
 
-  delay(250);  // Tune delay as needed to reduce flicker and keep responsiveness
-}
+   // Tune delay as needed to reduce flicker and keep responsiveness
+   delay(250); 
+  }
+
+
