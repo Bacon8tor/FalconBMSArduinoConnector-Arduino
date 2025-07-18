@@ -14,7 +14,7 @@ public:
   void begin(HardwareSerial& serial = Serial, uint32_t baud = 115200);
   void update();  // Call in loop()
   void getLightBits(int lb);
-  void getDEDLines(int line);
+  void getDED();
 
   // Connection status
   bool isConnected();
@@ -157,7 +157,7 @@ private:
   void checkBlinkBits();
   void sendCommand(uint8_t commandByte);
   void waitForPacket();
-
+  void decodeDED(uint8_t* data, uint8_t len);
   // Bit flags
   bool _bits[32];
   bool _bits2[32];

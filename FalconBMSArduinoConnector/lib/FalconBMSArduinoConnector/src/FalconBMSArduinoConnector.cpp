@@ -49,36 +49,11 @@ void FalconBMSArduinoConnector::getLightBits(int lb){
  }
 }
 
-//changes
-void FalconBMSArduinoConnector::getDEDLines(int line) {
-  if (line < 0 || line >= 5) return;  // sanity check
-
-  // Flush serial input buffer
-  while (_serial->available()) _serial->read();
-
-  delay(5);
-
-  // Send request: "DED0" to "DED4"
-  _serial->print("DED");
-  _serial->println(line);  // avoid String concatenation
-
-  delay(5);
-
-  // Read response up to 26 characters or until newline
-  int index = 0;
-  while (_serial->available()) {
-    char c = _serial->read();
-    if (c == '\n' || index >= 26) break;
-    dedLines[line][index++] = c;
-  }
-
-  dedLines[line][index] = '\0';  // null-terminate
-
-  // Optional: trim trailing whitespace
-  while (index > 0 && isspace(dedLines[line][index - 1])) {
-    dedLines[line][--index] = '\0';
-  }
+void FalconBMSArduinoConnector::getDED()
+{
+  sendCommand(0x05);
 }
+
 
 bool FalconBMSArduinoConnector::isConnected() {
   return connected;
@@ -108,6 +83,9 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
     case 0x04:
       memcpy(&blinkBits,data,len);
       checkBlinkBits();
+      break;
+    case 0x05:
+      decodeDED(data,len);
       break;
     case 0x0F:
 
@@ -287,6 +265,18 @@ void FalconBMSArduinoConnector::checkBlinkBits() {
   _blinkBits[11] = blinkBits & B_JFSOn_Fast;
   _blinkBits[12] = blinkBits & B_ECM_Oper;
 }
+
+void FalconBMSArduinoConnector::decodeDED(uint8_t* data, uint8_t len) {
+  if (len < 120) return; // Must be 5 lines x 24 chars
+
+  for (int i = 0; i < 5; i++) {
+    memcpy(dedLines[i], &data[i * 24], 24);
+    dedLines[i][24] = '\0'; // Null-terminate
+  }
+
+}
+
+
 
 // Individual accessors
 #define DEFINE_GETTER(name, index) bool FalconBMSArduinoConnector::name() { return _bits[index]; }
