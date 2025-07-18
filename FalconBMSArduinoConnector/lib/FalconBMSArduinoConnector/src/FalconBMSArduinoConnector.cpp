@@ -9,76 +9,44 @@ void FalconBMSArduinoConnector::begin(HardwareSerial& serial, uint32_t baud) {
   _serial = &serial;
   _serial->begin(baud);
   while (!_serial);
-  _serial->println("READY");
   connected = true;
+
 }
 //changed
 void FalconBMSArduinoConnector::update() {
-  if (!connected && (millis() - lastSerialActivity > 1000)) {
-    _serial->println("READY");
-    lastSerialActivity = millis();
-    connected = true;
+  if (!connected && _serial->available()) {
+    byte incoming = _serial->read();
+    if (incoming == 0xA5) {
+      _serial->write(0x5A);
+      connected = true;
+      lastSerialActivity = millis();    
+    }
   }
-    delay(10);
-    getLightBits("lb");
-    delay(10);
-    getLightBits("lb2");
-    delay(10);
-    getLightBits("lb3");
-     delay(10);
-    getDEDLines(0);
-    delay(10);
-    getDEDLines(1);
-   delay(10);
-    getDEDLines(2);
-    delay(10);
-    getDEDLines(3);
-    delay(10);
-    getDEDLines(4);
-    
-    
-  if (connected && (millis() - lastSerialActivity > timeoutMs)) {
+
+  if (connected && millis() - lastSerialActivity > timeoutMs) {
     connected = false;
   }
+
 }
 
-void FalconBMSArduinoConnector::getLightBits(String bits){
-  while (_serial->available()) _serial->read();  // flush input buffer
-
-  _serial->println(bits);
-  delay(10);
-  while (_serial->available()) {
-    uint8_t b = _serial->read();
-
-    if (!isReading) {
-      if (b == 0xAA) {
-        isReading = true;
-        idx = 0;
-      }
-      continue;
-    }
-
-    buffer[idx++] = b;
-
-    if (idx >= 2) {
-      uint8_t expectedLen = buffer[1];
-      if (idx == 2 + expectedLen + 1) {
-        uint8_t type = buffer[0];
-        uint8_t len = buffer[1];
-        uint8_t* data = &buffer[2];
-        uint8_t checksum = buffer[2 + len];
-
-        uint8_t sum = type + len;
-        for (int i = 0; i < len; i++) sum += data[i];
-
-        if (checksum == (sum & 0xFF)) {
-          handlePacket(type, data, len);
-        }
-
-        isReading = false;
-      }
-    }
-  }
+void FalconBMSArduinoConnector::getLightBits(int lb){
+ switch(lb){
+      case 1:
+      sendCommand(0x01);
+      break;
+      case 2:
+      sendCommand(0x02);
+      break;
+      case 3:
+      sendCommand(0x03);
+      break;
+      case 4:
+      sendCommand(0x04);
+      break;
+      default:
+      sendCommand(0x00);
+      break;
+ }
 }
 
 //changes
@@ -112,39 +80,93 @@ void FalconBMSArduinoConnector::getDEDLines(int line) {
   }
 }
 
-// void FalconBMSArduinoConnector::getDEDLines(int line) {
-//   while (_serial->available()) _serial->read();  // flush input buffer
-//   delay(5);
-//   _serial->println("DED" + String(line)); //request dedline
-//   delay(5);
-//  String ded_t;
-//   if (_serial->available()) {
-//     ded_t = _serial->readStringUntil('\n');
-//     ded_t.trim();
-//     dedLines[line] = ded_t;
-//   }
-// }
-
-
-
-
 bool FalconBMSArduinoConnector::isConnected() {
   return connected;
 }
 
-void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_t len) {
-  lastSerialActivity = millis();
-  connected = true;
+void FalconBMSArduinoConnector::sendCommand(uint8_t commandByte) {
+  _serial->write(commandByte);
+  waitForPacket();
+}
 
-  if (type == 0x01 && len == 4) {
-    memcpy(&lightBits, data, 4);
-    checkLightBits();
-  } else if (type == 0x02 && len == 4) {
-    memcpy(&lightBits2, data, 4);
-    checkLightBits2();
-  }else if (type == 0x03 && len == 4) {
-    memcpy(&lightBits2, data, 4);
-    //checkLightBits2();
+void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_t len) {
+  switch (type) {
+    //LightBits
+    case 0x01:
+      memcpy(&lightBits,data,len);
+      checkLightBits();
+
+      break;
+    case 0x02:
+      memcpy(&lightBits2,data,len);
+      checkLightBits2();
+      break;
+    case 0x03:
+      memcpy(&lightBits3,data,len);
+      checkLightBits3();
+      break;
+    case 0x04:
+      memcpy(&blinkBits,data,len);
+      checkBlinkBits();
+      break;
+    case 0x0F:
+
+      break;
+    case 0xA5: // Handshake byte?
+      _serial->write(0x5A);
+     // lcdPrintLine(1, "Recv: Handshake");
+      break;
+
+    default: {
+      _serial->write(0x00);
+      break;
+    }
+  }
+}
+
+void FalconBMSArduinoConnector::waitForPacket(){
+  unsigned long start = millis();
+  isReading = false;
+  idx = 0;
+
+  while (millis() - start < timeoutMs) {
+    if (_serial->available()) {
+      uint8_t b = _serial->read();
+
+      if (!isReading) {
+        if (b == 0xAA) {
+          isReading = true;
+          idx = 0;
+        }
+        continue;
+      }
+
+      buffer[idx++] = b;
+
+      if (idx >= 2) {
+        uint8_t expectedLen = buffer[1];
+        if (idx == 2 + expectedLen + 1) {
+          // Full packet received
+          uint8_t type = buffer[0];
+          uint8_t len = buffer[1];
+          uint8_t* data = &buffer[2];
+          uint8_t checksum = buffer[2 + len];
+
+          uint8_t sum = type + len;
+          for (int i = 0; i < len; i++) sum += data[i];
+
+          if ((sum & 0xFF) == checksum) {
+            handlePacket(type, data, len);
+            lastSerialActivity = millis();
+            
+          } else {
+          
+          }
+
+          return;
+        }
+      }
+    }
   }
 }
 
@@ -250,6 +272,22 @@ void FalconBMSArduinoConnector::checkLightBits3() {
   _bits3[28] = lightBits3 & Inlet_Icing;
 }
 
+void FalconBMSArduinoConnector::checkBlinkBits() {
+  _blinkBits[0] = blinkBits & B_OuterMarker;
+  _blinkBits[1] = blinkBits & B_MiddleMarker;
+  _blinkBits[2] = blinkBits & B_PROBEHEAT;
+  _blinkBits[3] = blinkBits & B_AuxSrch;
+  _blinkBits[4] = blinkBits & B_Launch;
+  _blinkBits[5] = blinkBits & B_PriMode;
+  _blinkBits[6] = blinkBits & B_Unk;
+  _blinkBits[7] = blinkBits & B_Elec_Fault;
+  _blinkBits[8] = blinkBits & B_OXY_BROW;
+  _blinkBits[9] = blinkBits & B_EPUOn;
+  _blinkBits[10] = blinkBits & B_JFSOn_Slow;
+  _blinkBits[11] = blinkBits & B_JFSOn_Fast;
+  _blinkBits[12] = blinkBits & B_ECM_Oper;
+}
+
 // Individual accessors
 #define DEFINE_GETTER(name, index) bool FalconBMSArduinoConnector::name() { return _bits[index]; }
 
@@ -352,3 +390,19 @@ DEFINE_GETTER3(isMLGWOW, 25)
 DEFINE_GETTER3(isNLGWOW, 26)
 DEFINE_GETTER3(isATFNotEngaged, 27)
 DEFINE_GETTER3(isInletIcing, 28)
+
+#define DEFINE_BLINK_GETTER(name, index) bool FalconBMSArduinoConnector::name() { return _blinkBits[index]; }
+
+DEFINE_BLINK_GETTER(isOuterMarkerBlinking, 0)
+DEFINE_BLINK_GETTER(isMiddleMarkerBlinking, 1)
+DEFINE_BLINK_GETTER(isProbeHeatBlinking, 2)
+DEFINE_BLINK_GETTER(isAuxSrchBlinking, 3)
+DEFINE_BLINK_GETTER(isLaunchBlinking, 4)
+DEFINE_BLINK_GETTER(isPriModeBlinking, 5)
+DEFINE_BLINK_GETTER(isUnkBlinking, 6)
+DEFINE_BLINK_GETTER(isElecFaultBlinking, 7)
+DEFINE_BLINK_GETTER(isOxyBrowBlinking, 8)
+DEFINE_BLINK_GETTER(isEPUOnBlinking, 9)
+DEFINE_BLINK_GETTER(isJFSOnSlowBlinking, 10)
+DEFINE_BLINK_GETTER(isJFSOnFastBlinking, 11)
+DEFINE_BLINK_GETTER(isECMOperBlinking, 12)

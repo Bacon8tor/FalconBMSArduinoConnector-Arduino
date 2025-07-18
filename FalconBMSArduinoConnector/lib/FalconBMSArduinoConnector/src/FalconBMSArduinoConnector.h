@@ -5,6 +5,7 @@
 #include "LightBits.h"
 #include "LightBits2.h"
 #include "LightBits3.h"
+#include "BlinkBits.h"
 
 class FalconBMSArduinoConnector {
 public:
@@ -12,12 +13,12 @@ public:
 
   void begin(HardwareSerial& serial = Serial, uint32_t baud = 115200);
   void update();  // Call in loop()
-  void getLightBits(String bits);
+  void getLightBits(int lb);
   void getDEDLines(int line);
 
   // Connection status
   bool isConnected();
-
+  unsigned long lastSerialActivity;
   //DED
   //String dedLines[5];
   char dedLines[5][27];
@@ -120,28 +121,48 @@ public:
   bool isATFNotEngaged();
   bool isInletIcing();
 
+  // BlinkBits individual getters
+  bool isOuterMarkerBlinking();
+  bool isMiddleMarkerBlinking();
+  bool isProbeHeatBlinking();
+  bool isAuxSrchBlinking();
+  bool isLaunchBlinking();
+  bool isPriModeBlinking();
+  bool isUnkBlinking();
+  bool isElecFaultBlinking();
+  bool isOxyBrowBlinking();
+  bool isEPUOnBlinking();
+  bool isJFSOnSlowBlinking();
+  bool isJFSOnFastBlinking();
+  bool isECMOperBlinking();
+
 private:
   HardwareSerial* _serial;
   uint32_t lightBits;
   uint32_t lightBits2;
   uint32_t lightBits3;
-  
+  uint32_t blinkBits;
+
   uint8_t buffer[134];
   uint8_t idx;
   bool isReading;
   bool connected;
-  unsigned long lastSerialActivity;
-  const unsigned long timeoutMs = 5000;
+  
+  const unsigned long timeoutMs = 1000;
 
   void handlePacket(uint8_t type, uint8_t* data, uint8_t len);
   void checkLightBits();
   void checkLightBits2();
   void checkLightBits3();
+  void checkBlinkBits();
+  void sendCommand(uint8_t commandByte);
+  void waitForPacket();
 
   // Bit flags
   bool _bits[32];
   bool _bits2[32];
   bool _bits3[32];
+  bool _blinkBits[13];
 };
 
 #endif
