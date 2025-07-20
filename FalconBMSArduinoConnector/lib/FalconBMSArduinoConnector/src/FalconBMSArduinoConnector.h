@@ -15,13 +15,16 @@ public:
   void update();  // Call in loop()
   void getLightBits(int lb);
   void getDED();
-
+  void getFuelFlow();
+  uint8_t* P_data;//remove just for debugging
   // Connection status
   bool isConnected();
   unsigned long lastSerialActivity;
   //DED
-  //String dedLines[5];
   char dedLines[5][27];
+  //Fuel
+  float fuelFlow;
+
   // Light bit getters
   bool isMasterCaution();
   bool isTF();
@@ -55,6 +58,8 @@ public:
   bool isCabinPress();
   bool isAutoPilotOn();
   bool isTFRSTBY();
+  bool isAllLampBitsOn(); //Not Sure if these are working 
+  bool isAllLampBits; //trying to check ALl LampBits
 
   // LightBits2-related getters
   bool isHandOff();
@@ -143,12 +148,13 @@ private:
   uint32_t lightBits3;
   uint32_t blinkBits;
 
+  
   uint8_t buffer[134];
   uint8_t idx;
   bool isReading;
   bool connected;
   
-  const unsigned long timeoutMs = 1000;
+  const unsigned long timeoutMs = 500;
 
   void handlePacket(uint8_t type, uint8_t* data, uint8_t len);
   void checkLightBits();

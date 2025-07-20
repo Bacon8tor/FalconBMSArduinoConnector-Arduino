@@ -9,14 +9,11 @@
 #include <Wire.h>
 #endif
 
-// Use Page Buffer instead of Full Buffer to save RAM
-
-U8G2_SSD1322_NHD_256X64_F_4W_HW_SPI u8g2(U8G2_R0, /* cs=*/ 5, /* dc=*/ 16, /* reset=*/ 17);	// Enable U8G2_16BIT in u8g2.h
+// For I2C on ESP32 (SDA = GPIO21, SCL = GPIO22)
+U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2_DED(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
 FalconBMSArduinoConnector bms;
 
-// Use char arrays instead of String to save RAM
-char previousLines[5][27];  // 26 chars + null terminator
 
 #if defined(ESP32)
 const int ledPin = 2;
@@ -32,76 +29,48 @@ void setup() {
   while (!Serial);
   bms.begin();
 
-  u8g2.begin();
-  u8g2.setFont(u8g2_font_6x13_tr);  // Fits 26x5 lines
+  u8g2_DED.setI2CAddress(0x3C << 1);
+  u8g2_DED.begin();
 
-  // Show startup message once
-  u8g2.firstPage();
-  do {
-    u8g2.drawStr(0, 12, "U8G2 Library Init");
-  } while (u8g2.nextPage());
+  u8g2_DED.setFont(u8g2_font_5x7_tr); 
+  u8g2_DED.clearBuffer();
+  u8g2_DED.drawStr(0, 10, "Starting...");
+  u8g2_DED.sendBuffer();
 
   delay(1000);
 
-  // Initialize previousLines with empty strings
-  for (int i = 0; i < 5; i++) {
-    previousLines[i][0] = '\0';
-  }
+
 }
 
-void draw() {
-  u8g2.clearBuffer();  // Clear internal RAM buffer
+void printDED(){
+    char buffer[32];
+    u8g2_DED.clearBuffer();
 
-  for (int i = 0; i < 5; i++) {
-    u8g2.drawStr(0, (i + 1) * 12, previousLines[i]);  // Adjust Y spacing as needed
-  }
+      for (int i = 0; i < 5; i++) {
+        int x = (128 - u8g2_DED.getStrWidth(bms.dedLines[i])) / 2;
+        u8g2_DED.drawStr(x, (i + 1) * 11, bms.dedLines[i]);
 
-  u8g2.sendBuffer();  // Push buffer to screen
-}
+      }
+      u8g2_DED.sendBuffer();
+
+} 
 
 
 void loop() {
   bms.update();
-
+  
   if (bms.isConnected()) {
-    digitalWrite(ledPin, bms.isMasterCaution() ? HIGH : LOW);
-
-    bool needsRedraw = false;
-    for (int i = 0; i < 5; i++) {
-      const char* currentLine = bms.dedLines[i];//.c_str();
-      if (strcmp(currentLine, previousLines[i]) != 0) {
-        strncpy(previousLines[i], currentLine, 26);
-        previousLines[i][26] = '\0';
-        needsRedraw = true;
-      }
-    }
+    digitalWrite(ledPin, HIGH); //is connected and recievign data
+    bms.getDED();
+    printDED();
     
-
-    if (needsRedraw) {
-    
-    draw();
-    
-    //   u8g2.firstPage();
-    //   do {
-    //     for (int i = 0; i < 5; i++) {
-    //       u8g2.drawStr(0, (i + 1) * 12, previousLines[i]);
-    //     }
-    //   } while (u8g2.nextPage());
-    // }
   }
   else {
     digitalWrite(ledPin, LOW);
-
-    // Display disconnected only once or when status changes to avoid flicker
-    static bool wasConnected = true;
-    if (wasConnected) {
-      u8g2.firstPage();
-      do {
-        u8g2.drawStr(0, 12, "Disconnected");
-      } while (u8g2.nextPage());
-      wasConnected = false;
-    }
+    u8g2_DED.clearBuffer();
+    u8g2_DED.drawStr(0, 15, "Not Connected....");
+    u8g2_DED.sendBuffer();
   }
 
-  delay(250);  // Tune delay as needed to reduce flicker and keep responsiveness
+ 
 }

@@ -44,7 +44,7 @@ void FalconBMSArduinoConnector::getLightBits(int lb){
       sendCommand(0x04);
       break;
       default:
-      sendCommand(0x00);
+      sendCommand(0x5A);
       break;
  }
 }
@@ -54,6 +54,9 @@ void FalconBMSArduinoConnector::getDED()
   sendCommand(0x05);
 }
 
+void FalconBMSArduinoConnector::getFuelFlow(){
+  sendCommand(0x06);
+}
 
 bool FalconBMSArduinoConnector::isConnected() {
   return connected;
@@ -65,6 +68,7 @@ void FalconBMSArduinoConnector::sendCommand(uint8_t commandByte) {
 }
 
 void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_t len) {
+  P_data = data;
   switch (type) {
     //LightBits
     case 0x01:
@@ -87,16 +91,16 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
     case 0x05:
       decodeDED(data,len);
       break;
-    case 0x0F:
-
+    case 0x06:
+      memcpy(&fuelFlow,data,sizeof(float));
       break;
     case 0xA5: // Handshake byte?
       _serial->write(0x5A);
-     // lcdPrintLine(1, "Recv: Handshake");
+      connected = true;
+      lastSerialActivity = millis(); 
       break;
-
     default: {
-      _serial->write(0x00);
+      _serial->write(0xA5);
       break;
     }
   }
@@ -149,6 +153,13 @@ void FalconBMSArduinoConnector::waitForPacket(){
 }
 
 void FalconBMSArduinoConnector::checkLightBits() {
+
+  if(lightBits == 0xBFFFFFEF){
+      isAllLampBits = true;
+  } else {
+      isAllLampBits = false;
+  }
+
   _bits[0] = lightBits & MasterCaution;
   _bits[1] = lightBits & TF;
   _bits[2] = lightBits & OXY_BROW;
@@ -181,6 +192,7 @@ void FalconBMSArduinoConnector::checkLightBits() {
   _bits[29] = lightBits & CabinPress;
   _bits[30] = lightBits & AutoPilotOn;
   _bits[31] = lightBits & TFR_STBY;
+  _bits[32] = lightBits & AllLampBitsOn;
 }
 
 void FalconBMSArduinoConnector::checkLightBits2() {
@@ -313,6 +325,7 @@ DEFINE_GETTER(isNWSFail, 28)
 DEFINE_GETTER(isCabinPress, 29)
 DEFINE_GETTER(isAutoPilotOn, 30)
 DEFINE_GETTER(isTFRSTBY, 31)
+DEFINE_GETTER(isAllLampBitsOn, 32)
 
 #define DEFINE_GETTER2(name, index) bool FalconBMSArduinoConnector::name() { return _bits2[index]; }
 
