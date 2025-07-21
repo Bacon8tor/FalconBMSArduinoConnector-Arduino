@@ -7,23 +7,40 @@
 #include "LightBits3.h"
 #include "BlinkBits.h"
 
+#include "falconded_font.h"
+
 class FalconBMSArduinoConnector {
 public:
   FalconBMSArduinoConnector();
 
-  void begin(HardwareSerial& serial = Serial, uint32_t baud = 115200);
-  void update();  // Call in loop()
-  void getLightBits(int lb);
-  void getDED();
-  void getFuelFlow();
-  uint8_t* P_data;//remove just for debugging
   // Connection status
   bool isConnected();
   unsigned long lastSerialActivity;
+  uint8_t u8g2_font_FBAC_DED_FONT_5x8_tf;
+  void begin(HardwareSerial& serial = Serial, uint32_t baud = 115200);
+  
+  void update();  // Call in loop()
+  void checkAllLights();
+  void getLightBits(int lb);
+  void getblinkBits();
+  void getDED();
+  void getFuelFlow();
+  void getPFL();
+  void getChaffFlareCount();
+  
   //DED
   char dedLines[5][27];
+  char pflLines[5][27];
+  
   //Fuel
   float fuelFlow;
+
+  //Chaff/Flare
+  float chaffCount;
+  float flareCount;
+
+  //RPM 
+  float rpm;
 
   // Light bit getters
   bool isMasterCaution();
@@ -147,7 +164,7 @@ private:
   uint32_t lightBits2;
   uint32_t lightBits3;
   uint32_t blinkBits;
-
+  uint32_t instrLight;
   
   uint8_t buffer[134];
   uint8_t idx;
@@ -157,18 +174,25 @@ private:
   const unsigned long timeoutMs = 500;
 
   void handlePacket(uint8_t type, uint8_t* data, uint8_t len);
+  
   void checkLightBits();
   void checkLightBits2();
   void checkLightBits3();
   void checkBlinkBits();
+  void setInstrLights();
   void sendCommand(uint8_t commandByte);
   void waitForPacket();
   void decodeDED(uint8_t* data, uint8_t len);
+  void decodePFL(uint8_t* data, uint8_t len);
+
+
   // Bit flags
   bool _bits[32];
   bool _bits2[32];
   bool _bits3[32];
   bool _blinkBits[13];
 };
+
+
 
 #endif

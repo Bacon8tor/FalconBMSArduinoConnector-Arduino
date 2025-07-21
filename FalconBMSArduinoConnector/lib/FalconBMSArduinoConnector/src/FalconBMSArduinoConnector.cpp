@@ -1,5 +1,7 @@
 #include "FalconBMSArduinoConnector.h"
 
+#include <Arduino.h>
+
 FalconBMSArduinoConnector::FalconBMSArduinoConnector()
   : lightBits(0), lightBits2(0), idx(0), isReading(false), connected(false), lastSerialActivity(0), _serial(&Serial) {
   memset(_bits, 0, sizeof(_bits));
@@ -11,7 +13,9 @@ void FalconBMSArduinoConnector::begin(HardwareSerial& serial, uint32_t baud) {
   while (!_serial);
   connected = true;
 
+
 }
+
 //changed
 void FalconBMSArduinoConnector::update() {
   if (!connected && _serial->available()) {
@@ -25,6 +29,7 @@ void FalconBMSArduinoConnector::update() {
 
   if (connected && millis() - lastSerialActivity > timeoutMs) {
     connected = false;
+    
   }
 
 }
@@ -40,18 +45,32 @@ void FalconBMSArduinoConnector::getLightBits(int lb){
       case 3:
       sendCommand(0x03);
       break;
-      case 4:
-      sendCommand(0x04);
-      break;
+      // case 4:
+      // sendCommand(0x04);
+      // break;
       default:
       sendCommand(0x5A);
       break;
  }
 }
 
+void FalconBMSArduinoConnector::getblinkBits(){
+  sendCommand(0x04);
+}
+
+void FalconBMSArduinoConnector::getPFL()
+{
+  sendCommand(0x08);
+}
+
 void FalconBMSArduinoConnector::getDED()
 {
   sendCommand(0x05);
+}
+
+void FalconBMSArduinoConnector::getChaffFlareCount() {
+  sendCommand(0x09);
+  sendCommand(0x10);
 }
 
 void FalconBMSArduinoConnector::getFuelFlow(){
@@ -68,7 +87,7 @@ void FalconBMSArduinoConnector::sendCommand(uint8_t commandByte) {
 }
 
 void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_t len) {
-  P_data = data;
+
   switch (type) {
     //LightBits
     case 0x01:
@@ -94,6 +113,25 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
     case 0x06:
       memcpy(&fuelFlow,data,sizeof(float));
       break;
+    case 0x07:
+      memcpy(&instrLight,data,len);
+      setInstrLights();
+      break;
+    case 0x08:
+      decodePFL(data,len);
+    break;
+    case 0x09:
+      memcpy(&chaffCount,data,sizeof(float));
+    break;
+    case 0x10:
+      memcpy(&flareCount,data,sizeof(float));
+    break;
+    case 0x11:
+      //floodconsoleLights
+    break;
+    case 0x12:
+      memcpy(&rpm,data,sizeof(float));
+    break;
     case 0xA5: // Handshake byte?
       _serial->write(0x5A);
       connected = true;
@@ -150,6 +188,37 @@ void FalconBMSArduinoConnector::waitForPacket(){
       }
     }
   }
+}
+
+void FalconBMSArduinoConnector::setInstrLights(){
+  //check instrlights  0 = off, 1 = dim , 2 = bright
+}
+
+void FalconBMSArduinoConnector::decodePFL(uint8_t* data, uint8_t len) {
+  if (len < 120) return; // Must be 5 lines x 24 chars
+
+  for (int i = 0; i < 5; i++) {
+    memcpy(pflLines[i], &data[i * 24], 24);
+    pflLines[i][24] = '\0'; // Null-terminate
+  }
+
+}
+
+void FalconBMSArduinoConnector::decodeDED(uint8_t* data, uint8_t len) {
+  if (len < 120) return; // Must be 5 lines x 24 chars
+
+  for (int i = 0; i < 5; i++) {
+    memcpy(dedLines[i], &data[i * 24], 24);
+    dedLines[i][24] = '\0'; // Null-terminate
+  }
+
+}
+
+void FalconBMSArduinoConnector::checkAllLights(){
+    getLightBits(1);
+    getLightBits(2);
+    getLightBits(3);
+    getblinkBits(); //blink
 }
 
 void FalconBMSArduinoConnector::checkLightBits() {
@@ -278,18 +347,6 @@ void FalconBMSArduinoConnector::checkBlinkBits() {
   _blinkBits[12] = blinkBits & B_ECM_Oper;
 }
 
-void FalconBMSArduinoConnector::decodeDED(uint8_t* data, uint8_t len) {
-  if (len < 120) return; // Must be 5 lines x 24 chars
-
-  for (int i = 0; i < 5; i++) {
-    memcpy(dedLines[i], &data[i * 24], 24);
-    dedLines[i][24] = '\0'; // Null-terminate
-  }
-
-}
-
-
-
 // Individual accessors
 #define DEFINE_GETTER(name, index) bool FalconBMSArduinoConnector::name() { return _bits[index]; }
 
@@ -409,3 +466,5 @@ DEFINE_BLINK_GETTER(isEPUOnBlinking, 9)
 DEFINE_BLINK_GETTER(isJFSOnSlowBlinking, 10)
 DEFINE_BLINK_GETTER(isJFSOnFastBlinking, 11)
 DEFINE_BLINK_GETTER(isECMOperBlinking, 12)
+
+

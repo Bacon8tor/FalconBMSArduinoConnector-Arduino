@@ -61,7 +61,7 @@ void setup()
   bms.begin();
   //Serial.println("Falcon BMS connector initialized.");
 
-  u8g2_DED.setI2CAddress(0x3C << 1);
+ // u8g2_DED.setI2CAddress(0x3C << 1);
   u8g2_DED.begin();
   u8g2_FuelFlow.setI2CAddress(0x3D << 1);
   u8g2_FuelFlow.begin();
@@ -157,21 +157,19 @@ void printFuelFlow() {
     u8g2_FuelFlow.sendBuffer();
 }
 
-
-
 void loop()
 {
   bms.update();
       
   if(bms.isConnected())
   {
-    bms.getLightBits(1);
-    bms.getLightBits(2);
-    bms.getLightBits(3);
-    bms.getLightBits(4);
+    digitalWrite(ledPin,HIGH);
+
+    bms.checkAllLights();
+    bms.getPFL();
     bms.getDED();
     bms.getFuelFlow();
-    digitalWrite(ledPin,HIGH);
+    bms.getChaffFlareCount();
 
     printDED();
     printFuelFlow();
@@ -189,7 +187,7 @@ void loop()
 
       u8g2_FuelFlow.setFont(u8g2_font_5x7_tr); 
       u8g2_FuelFlow.clearBuffer();
-      u8g2_FuelFlow.drawStr(0, 15, "Not Connected....");
+      u8g2_FuelFlow.drawStr(0, 15, "BMS Not Connected....");
       u8g2_FuelFlow.sendBuffer();
       leds[0] = CRGB::Red;
        FastLED.show();
