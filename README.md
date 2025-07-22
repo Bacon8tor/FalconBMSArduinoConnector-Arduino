@@ -1,6 +1,6 @@
 # FalconBMSArduinoConnector (Arduino Library)
 
-**FalconBMSArduinoConnector** is an Arduino library that allows you to connect your microcontroller to a PC running Falcon BMS via a serial interface. It provides easy access to cockpit data such as LightBits, LightBits2, LightBits3, and DED lines.
+**FalconBMSArduinoConnector** is an Arduino library that allows you to connect your microcontroller to a PC running Falcon BMS via a serial interface. It provides easy access to cockpit data such as LightBits, LightBits2, LightBits3, DED lines and other Flight Data.
 
 This library is part of a larger ecosystem allowing home cockpit builders and simulation enthusiasts to bring Falcon BMS data into real-world hardware like LEDs, displays, or gauges.
 
@@ -13,9 +13,16 @@ This library is part of a larger ecosystem allowing home cockpit builders and si
 
 ## Installation
 
-1. Clone or download this repository.
-2. Place the `FalconBMSArduinoConnector` folder in your Arduino `libraries` directory.
-3. Include the library in your sketch:
+
+### Platformio (RECOMMENDED)
+1. Download or clone this repository [FBAC_Example](https://github.com/Bacon8tor/FBAC_PIO_Example)
+2. Copy or Open one of the included example sketches
+
+### Arduino IDE or Arduino Cloud
+1. Download the latest release 
+2. Upload to IDE 
+3. Create Sketch or load example
+
 
 ```cpp
 #include <FalconBMSArduinoConnector.h>
@@ -29,13 +36,11 @@ This library is part of a larger ecosystem allowing home cockpit builders and si
 FalconBMSArduinoConnector bms;
 
 void setup() {
-  Serial.begin(115200);
-  while(!Serial);
-  bms.begin();
+  bms.begin(); //Starts the Serial Connection
 }
 
 void loop() {
-  bms.update();
+  bms.update(); //Updates BMS Data and Checks Serial Connection
   // Your code here
 }
 ```
@@ -51,13 +56,14 @@ if (bms.isConnected()) {
 ### Access DED Lines
 
 ```cpp
-bms.getDEDLines(0);  // Request line 0
+bms.getDED();  // Request line 0
 Serial.println(bms.dedLines[0]);
 ```
 
 ### LightBits Example
 
 ```cpp
+bms.checkLightbits(1); // checks Lightbits
 if (bms.isMasterCaution()) {
   digitalWrite(ledPin, HIGH);
 }
@@ -175,16 +181,10 @@ This library listens for incoming serial data in the Falcon BMS shared memory fo
 
 * Call `update()` inside `loop()` to continuously parse data
 * Ensure your PC-side application is sending compatible packets
-* DED lines must be explicitly requested using `getDEDLines(lineNumber)`
 
 
 ## Credits
 
 Created by [Bacon8tor](https://github.com/Bacon8tor)
-
-```cpp
-bms.getDEDLines(0);  // Request line 0
-Serial.println(bms.dedLines[0]);
-```
 
 Contributions welcome! Feel free to fork and submit PRs or issues.
