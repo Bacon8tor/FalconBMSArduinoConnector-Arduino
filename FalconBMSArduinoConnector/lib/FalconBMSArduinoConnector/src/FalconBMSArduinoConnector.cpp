@@ -1,5 +1,4 @@
 #include "FalconBMSArduinoConnector.h"
-
 #include <Arduino.h>
 
 FalconBMSArduinoConnector::FalconBMSArduinoConnector()
@@ -12,11 +11,12 @@ void FalconBMSArduinoConnector::begin(HardwareSerial& serial, uint32_t baud) {
   _serial->begin(baud);
   while (!_serial);
   connected = true;
-
-
 }
 
-//changed
+bool FalconBMSArduinoConnector::isConnected() {
+  return connected;
+}
+
 void FalconBMSArduinoConnector::update() {
   if (!connected && _serial->available()) {
     byte incoming = _serial->read();
@@ -34,6 +34,7 @@ void FalconBMSArduinoConnector::update() {
 
 }
 
+// Fetch Data
 void FalconBMSArduinoConnector::getLightBits(int lb){
  switch(lb){
       case 1:
@@ -77,10 +78,7 @@ void FalconBMSArduinoConnector::getFuelFlow(){
   sendCommand(0x06);
 }
 
-bool FalconBMSArduinoConnector::isConnected() {
-  return connected;
-}
-
+//Packet handling
 void FalconBMSArduinoConnector::sendCommand(uint8_t commandByte) {
   _serial->write(commandByte);
   waitForPacket();
@@ -190,6 +188,7 @@ void FalconBMSArduinoConnector::waitForPacket(){
   }
 }
 
+// Assign Data
 void FalconBMSArduinoConnector::setInstrLights(){
   //check instrlights  0 = off, 1 = dim , 2 = bright
 }

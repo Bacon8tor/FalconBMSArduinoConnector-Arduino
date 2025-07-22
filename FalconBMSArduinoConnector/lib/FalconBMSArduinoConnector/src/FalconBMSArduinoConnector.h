@@ -7,7 +7,7 @@
 #include "LightBits3.h"
 #include "BlinkBits.h"
 
-#include "falconded_font.h"
+
 
 class FalconBMSArduinoConnector {
 public:
@@ -16,7 +16,7 @@ public:
   // Connection status
   bool isConnected();
   unsigned long lastSerialActivity;
-  uint8_t u8g2_font_FBAC_DED_FONT_5x8_tf;
+  
   void begin(HardwareSerial& serial = Serial, uint32_t baud = 115200);
   
   void update();  // Call in loop()
