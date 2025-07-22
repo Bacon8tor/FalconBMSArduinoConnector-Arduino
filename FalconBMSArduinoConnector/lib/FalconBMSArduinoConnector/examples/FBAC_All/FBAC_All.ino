@@ -1,16 +1,12 @@
+#define FBAC_DED_1306 // creates u8g2_DED 
+#define FBAC_PFL_1306 // creates u8g2_PFL
+#define FBAC_FF_1306  // creates u8g2_FuelFlow
+#define FBAC_FASTLED // creates FastLED object and related functions
+
+
 #include <Arduino.h>
 #include <FalconBMSArduinoConnector.h>
 
-//#include <OLED_I2C.h>
-#include <FastLED.h>
-
-#include <U8g2lib.h>
-
-
-// For I2C on ESP32 (SDA = GPIO21, SCL = GPIO22)
-U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2_DED(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
-// U8G2 for 128x64 I2C OLED
-U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2_FuelFlow(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
 #if defined(ESP32)
   const int ledPin = 2;  // Most ESP32 boards use GPIO2 for the onboard LED
@@ -26,7 +22,6 @@ U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2_FuelFlow(U8G2_R0, /* reset=*/ U8X8_PIN_
 CRGB leds[NUM_LEDS];
 
 FalconBMSArduinoConnector bms;
-//OLED  myOLED(21, 22);
 
 extern uint8_t SmallFont[];
 
@@ -180,7 +175,7 @@ void loop()
    {
     FastLED.clear();
      digitalWrite(ledPin, LOW);  
-      //u8g2_FuelFlow.clearBuffer();
+      
       u8g2_DED.clearBuffer();
       u8g2_DED.drawStr(0, 15, "Not Connected....");
       u8g2_DED.sendBuffer();
@@ -193,7 +188,6 @@ void loop()
        FastLED.show();
    }
      
- // delay(100);
 }
 
 

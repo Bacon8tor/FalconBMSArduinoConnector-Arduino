@@ -1,17 +1,9 @@
-#include <FalconBMSArduinoConnector.h>
+#define FBAC_DED_1306
+
 #include <Arduino.h>
-#include <U8g2lib.h>
-#include "falconded_font.h"
 
-#ifdef U8G2_HAVE_HW_SPI
-#include <SPI.h>
-#endif
-#ifdef U8G2_HAVE_HW_I2C
-#include <Wire.h>
-#endif
+#include <FalconBMSArduinoConnector.h>
 
-// For I2C on ESP32 (SDA = GPIO21, SCL = GPIO22)
-U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2_DED(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
 
 FalconBMSArduinoConnector bms;
 

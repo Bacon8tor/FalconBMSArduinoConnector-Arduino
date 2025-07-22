@@ -12,8 +12,6 @@ void setup() {
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, LOW);
 
-  Serial.begin(115200);
-  while(!Serial);
   bms.begin();
 }
 
@@ -25,5 +23,5 @@ void loop() {
   } else {
     digitalWrite(ledPin, LOW);
   }
-  delay(50);  // Optional: adjust for responsiveness
+ 
 }
