@@ -29,6 +29,7 @@ void FalconBMSArduinoConnector::update() {
 
   if (connected && millis() - lastSerialActivity > timeoutMs) {
     connected = false;
+    _serial->write(0x5A);
     
   }
 
