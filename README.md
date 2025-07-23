@@ -187,4 +187,6 @@ This library listens for incoming serial data in the Falcon BMS shared memory fo
 
 Created by [Bacon8tor](https://github.com/Bacon8tor)
 
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://buymeacoffee.com/bacon8tor)
+
 Contributions welcome! Feel free to fork and submit PRs or issues.

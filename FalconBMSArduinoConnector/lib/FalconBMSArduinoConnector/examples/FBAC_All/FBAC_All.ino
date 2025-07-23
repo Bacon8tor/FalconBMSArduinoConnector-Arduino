@@ -1,5 +1,5 @@
-#define FBAC_DED_1306 // creates u8g2_DED 
-#define FBAC_PFL_1306 // creates u8g2_PFL
+#define FBAC_DED_1322 // creates u8g2_DED 
+#define FBAC_PFL_1309 // creates u8g2_PFL
 #define FBAC_FF_1306  // creates u8g2_FuelFlow
 #define FBAC_FASTLED // creates FastLED object and related functions
 
@@ -13,10 +13,14 @@
 #else
   const int ledPin = LED_BUILTIN;  // Fallback for Arduino Uno, Mega, Nano etc.
 #endif
+// Detect low-RAM AVR board (Uno/Nano)
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+  #define USE_PAGED_MODE
+#endif
 
 #define NUM_LEDS 32
 
-#define DATA_PIN 5
+#define DATA_PIN 3
 
 // Define the array of leds
 CRGB leds[NUM_LEDS];
@@ -46,37 +50,43 @@ void setup()
   
   bms.begin();
   pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW);
-  //Serial.println("LED pin set.");
+  digitalWrite(ledPin, LOW);  
 
   FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
   FastLED.setBrightness(20);
-  //Serial.println("FastLED initialized.");
 
   bms.begin();
-  //Serial.println("Falcon BMS connector initialized.");
-
- // u8g2_DED.setI2CAddress(0x3C << 1);
+  
   u8g2_DED.begin();
+  
   u8g2_FuelFlow.setI2CAddress(0x3D << 1);
   u8g2_FuelFlow.begin();
-  //Serial.println("OLED displays initialized.");
-
+  
+  #ifdef USE_PAGED_MODE
+  u8g2_DED.firstPage();
+  do {
+    u8g2_DED.drawStr(0, 10, "STARTING...");
+  } while (u8g2_DED.nextPage());
+  u8g2_FuelFlow.firstPage();
+  do {
+    u8g2_FuelFlow.drawStr(0, 10, "STARTING...");
+  } while (u8g2_FuelFlow.nextPage());
+#else
   u8g2_DED.setFont(u8g2_font_5x7_tr); 
   u8g2_DED.clearBuffer();
   u8g2_DED.drawStr(0, 10, "Starting...");
   u8g2_DED.sendBuffer();
-  //Serial.println("Display message sent.");
 
   u8g2_FuelFlow.setFont(u8g2_font_5x7_tr); 
   u8g2_FuelFlow.clearBuffer();
   u8g2_FuelFlow.drawStr(0, 10, "Starting...");
   u8g2_FuelFlow.sendBuffer();
-
+#endif
 
   rainbow();
 
 }
+
 
 void updateCautionPanel() {
   if(bms.isAllLampBits){
@@ -121,18 +131,32 @@ void updateCautionPanel() {
    FastLED.show();
 }
 
-void printDED(){
-    char buffer[32];
-    u8g2_DED.clearBuffer();
+void printDED() {
+  uint8_t charHeight = u8g2_DED.getMaxCharHeight();
+  uint8_t lineSpacing = 1;
+  uint8_t lineHeight = charHeight + lineSpacing;
 
-      for (int i = 0; i < 5; i++) {
-        int x = (128 - u8g2_DED.getStrWidth(bms.dedLines[i])) / 2;
-        u8g2_DED.drawStr(x, (i + 1) * 11, bms.dedLines[i]);
-
-      }
-      u8g2_DED.sendBuffer();
-
-} 
+#ifdef USE_PAGED_MODE
+  u8g2_DED.firstPage();
+  do {
+    for (int i = 0; i < 5; i++) {
+      const char* line = bms.dedLines[i];
+      int x = (256 - u8g2_DED.getUTF8Width(line)) / 2;
+      int y = lineHeight * i + charHeight;
+      u8g2_DED.drawStr(x, y, line);
+    }
+  } while (u8g2_DED.nextPage());
+#else
+  u8g2_DED.clearBuffer();
+  for (int i = 0; i < 5; i++) {
+    const char* line = bms.dedLines[i];
+    int x = (256 - u8g2_DED.getUTF8Width(line)) / 2;
+    int y = lineHeight * i + charHeight;
+    u8g2_DED.drawStr(x, y, line);
+  }
+  u8g2_DED.sendBuffer();
+#endif
+}
 
 void printFuelFlow() {
     char buffer[16];
@@ -143,13 +167,23 @@ void printFuelFlow() {
     // Format as 5-digit number with leading zeros
     snprintf(buffer, sizeof(buffer), "%05d", flow);
 
-    u8g2_FuelFlow.clearBuffer();
-    u8g2_FuelFlow.setFont(u8g2_font_logisoso32_tf); // Large readable digits
+    #ifdef USE_PAGED_MODE
+      u8g2_FuelFlow.firstPage();
+      do {
+        u8g2_FuelFlow.setFont(u8g2_font_logisoso32_tf); // Large readable digits
+        int width = u8g2_FuelFlow.getStrWidth(buffer);
+        u8g2_FuelFlow.drawStr((128 - width) / 2, 50, buffer);
+      } while (u8g2_FuelFlow.nextPage());
+    #else 
+      u8g2_FuelFlow.clearBuffer();
+      u8g2_FuelFlow.setFont(u8g2_font_logisoso32_tf); // Large readable digits
 
-    int width = u8g2_FuelFlow.getStrWidth(buffer);
-    u8g2_FuelFlow.drawStr((128 - width) / 2, 50, buffer);
+      int width = u8g2_FuelFlow.getStrWidth(buffer);
+      u8g2_FuelFlow.drawStr((128 - width) / 2, 50, buffer);
 
-    u8g2_FuelFlow.sendBuffer();
+      u8g2_FuelFlow.sendBuffer();
+    
+    #endif
 }
 
 void loop()
@@ -175,7 +209,16 @@ void loop()
    {
     FastLED.clear();
      digitalWrite(ledPin, LOW);  
-      
+      #ifdef USE_PAGED_MODE
+        u8g2_DED.firstPage();
+        do {
+          u8g2_DED.drawStr(0, 15, "NOT CONNECTED....");
+        } while (u8g2_DED.nextPage());
+      u8g2_FuelFlow.firstPage();
+      do {
+        u8g2_FuelFlow.drawStr(0, 15, "BMS NOT CONNECTED....");
+      } while (u8g2_FuelFlow.nextPage());
+      #else
       u8g2_DED.clearBuffer();
       u8g2_DED.drawStr(0, 15, "Not Connected....");
       u8g2_DED.sendBuffer();
@@ -184,6 +227,7 @@ void loop()
       u8g2_FuelFlow.clearBuffer();
       u8g2_FuelFlow.drawStr(0, 15, "BMS Not Connected....");
       u8g2_FuelFlow.sendBuffer();
+      #endif
       leds[0] = CRGB::Red;
        FastLED.show();
    }

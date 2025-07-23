@@ -1,76 +1,91 @@
 #define FBAC_DED_1322
 
 #include <Arduino.h>
-
 #include <FalconBMSArduinoConnector.h>
-
-
 
 FalconBMSArduinoConnector bms;
 
-
-#if defined(ESP32)
+#if defined(ESP32) || defined(ESP8266)
 const int ledPin = 2;
 #else
 const int ledPin = 13;
+#endif
+
+// Detect low-RAM AVR board (Uno/Nano)
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+  #define USE_PAGED_MODE
 #endif
 
 void setup() {
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, LOW);
 
- bms.begin();
+  bms.begin();
 
-  u8g2_DED.setI2CAddress(0x3C << 1);
+  //u8g2_DED.setI2CAddress(0x3C << 1);
   u8g2_DED.begin();
 
   u8g2_DED.setFont(SD1322_FONT); 
+
+#ifdef USE_PAGED_MODE
+  u8g2_DED.firstPage();
+  do {
+    u8g2_DED.drawStr(0, 10, "STARTING...");
+  } while (u8g2_DED.nextPage());
+#else
   u8g2_DED.clearBuffer();
   u8g2_DED.drawStr(0, 10, "STARTING...");
   u8g2_DED.sendBuffer();
+#endif
 
-  delay(1000);
-
-
+  delay(200);
 }
 
 void printDED() {
-    char buffer[32];
-    u8g2_DED.clearBuffer();
+  uint8_t charHeight = u8g2_DED.getMaxCharHeight();
+  uint8_t lineSpacing = 1;
+  uint8_t lineHeight = charHeight + lineSpacing;
 
-    uint8_t charHeight = u8g2_DED.getMaxCharHeight();
-    uint8_t lineSpacing = 1; // You can tweak this
-    uint8_t lineHeight = charHeight + lineSpacing;
-
+#ifdef USE_PAGED_MODE
+  u8g2_DED.firstPage();
+  do {
     for (int i = 0; i < 5; i++) {
-        const char* line = bms.dedLines[i]; // assuming these are null-terminated C-strings
-
-        int x = (256 - u8g2_DED.getUTF8Width(line)) / 2;  // Centered
-        int y =  lineHeight * i + charHeight; // baseline y
-
-        u8g2_DED.drawStr(x, y, line);
+      const char* line = bms.dedLines[i];
+      int x = (256 - u8g2_DED.getUTF8Width(line)) / 2;
+      int y = lineHeight * i + charHeight;
+      u8g2_DED.drawStr(x, y, line);
     }
-
-    u8g2_DED.sendBuffer();
+  } while (u8g2_DED.nextPage());
+#else
+  u8g2_DED.clearBuffer();
+  for (int i = 0; i < 5; i++) {
+    const char* line = bms.dedLines[i];
+    int x = (256 - u8g2_DED.getUTF8Width(line)) / 2;
+    int y = lineHeight * i + charHeight;
+    u8g2_DED.drawStr(x, y, line);
+  }
+  u8g2_DED.sendBuffer();
+#endif
 }
 
-
-
 void loop() {
-  
- bms.update();
- if (bms.isConnected()) {
-    digitalWrite(ledPin, HIGH); //is connected and recievign data
+  bms.update();
+
+  if (bms.isConnected()) {
+    digitalWrite(ledPin, HIGH);
     bms.getDED();
-   printDED();
-    
- }
- else {
+    printDED();
+  } else {
     digitalWrite(ledPin, LOW);
+#ifdef USE_PAGED_MODE
+    u8g2_DED.firstPage();
+    do {
+      u8g2_DED.drawStr(0, 15, "NOT CONNECTED....");
+    } while (u8g2_DED.nextPage());
+#else
     u8g2_DED.clearBuffer();
     u8g2_DED.drawStr(0, 15, "NOT CONNECTED....");
     u8g2_DED.sendBuffer();
- }
-
- 
+#endif
+  }
 }
