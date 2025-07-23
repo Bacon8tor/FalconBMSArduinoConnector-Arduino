@@ -2,15 +2,26 @@
 #include <Arduino.h>
 
 FalconBMSArduinoConnector::FalconBMSArduinoConnector()
-  : lightBits(0), lightBits2(0), idx(0), isReading(false), connected(false), lastSerialActivity(0), _serial(&Serial) {
+  : lastSerialActivity(0),
+    _serial(&Serial),
+    lightBits(0),
+    lightBits2(0),
+    lightBits3(0),
+    blinkBits(0),
+    instrLight(0),
+    idx(0),
+    isReading(false),
+    connected(false)
+{
   memset(_bits, 0, sizeof(_bits));
 }
+
 
 void FalconBMSArduinoConnector::begin(HardwareSerial& serial, uint32_t baud) {
   _serial = &serial;
   _serial->begin(baud);
   while (!_serial);
-  connected = true;
+ // connected = true;
 }
 
 bool FalconBMSArduinoConnector::isConnected() {
@@ -25,14 +36,13 @@ void FalconBMSArduinoConnector::update() {
       connected = true;
       lastSerialActivity = millis();    
     }
-  }
+  } 
 
   if (connected && millis() - lastSerialActivity > timeoutMs) {
     connected = false;
     _serial->write(0x5A);
-    
   }
-
+  
 }
 
 // Fetch Data
@@ -137,7 +147,7 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
       lastSerialActivity = millis(); 
       break;
     default: {
-      _serial->write(0xA5);
+      _serial->write(0x5A);
       break;
     }
   }

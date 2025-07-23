@@ -11,6 +11,7 @@
 
 
 class FalconBMSArduinoConnector {
+
 public:
   FalconBMSArduinoConnector();
 
@@ -170,9 +171,9 @@ private:
   uint8_t buffer[134];
   uint8_t idx;
   bool isReading;
+
   bool connected;
-  
-  const unsigned long timeoutMs = 500;
+    const unsigned long timeoutMs = 1000;
 
   void handlePacket(uint8_t type, uint8_t* data, uint8_t len);
   
