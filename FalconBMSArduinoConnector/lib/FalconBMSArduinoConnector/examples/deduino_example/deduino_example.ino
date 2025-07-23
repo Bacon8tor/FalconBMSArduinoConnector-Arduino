@@ -16,7 +16,6 @@ void setup() {
 
   bms.begin();
 
-  //u8g2_DED.setI2CAddress(0x3C << 1);
   u8g2_DED.begin();
 
   u8g2_DED.setFont(SD1322_FONT); 

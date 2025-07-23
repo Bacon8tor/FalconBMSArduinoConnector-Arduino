@@ -1,34 +1,28 @@
 #define FBAC_DED_1322 // creates u8g2_DED 
-#define FBAC_PFL_1309 // creates u8g2_PFL
-#define FBAC_FF_1306  // creates u8g2_FuelFlow
-#define FBAC_FASTLED // creates FastLED object and related functions
+//#define FBAC_PFL_1309 // creates u8g2_PFL
+//#define FBAC_FF_1306  // creates u8g2_FuelFlow
+//#define FBAC_FASTLED // creates FastLED object and related functions
 
 
 #include <Arduino.h>
 #include <FalconBMSArduinoConnector.h>
 
 
-#if defined(ESP32)
-  const int ledPin = 2;  // Most ESP32 boards use GPIO2 for the onboard LED
-#else
-  const int ledPin = LED_BUILTIN;  // Fallback for Arduino Uno, Mega, Nano etc.
-#endif
 // Detect low-RAM AVR board (Uno/Nano)
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
   #define USE_PAGED_MODE
 #endif
 
+#ifdef FBAC_FASTLED
 #define NUM_LEDS 32
-
 #define DATA_PIN 3
-
 // Define the array of leds
 CRGB leds[NUM_LEDS];
-
+#endif
 FalconBMSArduinoConnector bms;
 
 extern uint8_t SmallFont[];
-
+#ifdef FBAC_FASTLED
 void rainbow() {
   // Example: rainbow cycle
   int h = 0;
@@ -44,47 +38,49 @@ void rainbow() {
   }
   FastLED.clear();
 }
-
+#endif
 void setup()
 {
   
   bms.begin();
-  pinMode(ledPin, OUTPUT);
-  digitalWrite(ledPin, LOW);  
-
+ 
+#ifdef FBAC_FASTLED
   FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
   FastLED.setBrightness(20);
-
+#endif
   bms.begin();
   
   u8g2_DED.begin();
-  
+  #ifdef FBAC_FF_1306
   u8g2_FuelFlow.setI2CAddress(0x3D << 1);
   u8g2_FuelFlow.begin();
-  
+  #endif
   #ifdef USE_PAGED_MODE
   u8g2_DED.firstPage();
   do {
     u8g2_DED.drawStr(0, 10, "STARTING...");
   } while (u8g2_DED.nextPage());
+  #ifdef FBAC_FF_1306
   u8g2_FuelFlow.firstPage();
   do {
     u8g2_FuelFlow.drawStr(0, 10, "STARTING...");
   } while (u8g2_FuelFlow.nextPage());
+  #endif
 #else
   u8g2_DED.setFont(u8g2_font_5x7_tr); 
   u8g2_DED.clearBuffer();
   u8g2_DED.drawStr(0, 10, "Starting...");
   u8g2_DED.sendBuffer();
-
+  #ifdef FBAC_FF_1306
   u8g2_FuelFlow.setFont(u8g2_font_5x7_tr); 
   u8g2_FuelFlow.clearBuffer();
   u8g2_FuelFlow.drawStr(0, 10, "Starting...");
   u8g2_FuelFlow.sendBuffer();
+  #endif
 #endif
-
+#ifdef FBAC_FASTLED
   rainbow();
-
+#endif
 }
 
 
@@ -158,6 +154,7 @@ void printDED() {
 #endif
 }
 
+#ifdef FBAC_FF_1306
 void printFuelFlow() {
     char buffer[16];
 
@@ -185,6 +182,7 @@ void printFuelFlow() {
     
     #endif
 }
+#endif
 
 void loop()
 {
@@ -192,7 +190,7 @@ void loop()
       
   if(bms.isConnected())
   {
-    digitalWrite(ledPin,HIGH);
+
 
     bms.checkAllLights();
     bms.getPFL();
@@ -201,35 +199,45 @@ void loop()
     bms.getChaffFlareCount();
 
     printDED();
+    #ifdef FBAC_FF_1306
     printFuelFlow();
+    #endif
+    #ifdef FBAC_FASTLED
     updateCautionPanel();    
+    #endif
     
    } 
    else 
    {
-    FastLED.clear();
-     digitalWrite(ledPin, LOW);  
+      #ifdef FBAC_FASTLED
+        FastLED.clear();
+        leds[0] = CRGB::Red;
+        FastLED.show();
+      #endif
+
       #ifdef USE_PAGED_MODE
         u8g2_DED.firstPage();
         do {
           u8g2_DED.drawStr(0, 15, "NOT CONNECTED....");
         } while (u8g2_DED.nextPage());
+      #ifdef FBAC_FF_1306
       u8g2_FuelFlow.firstPage();
       do {
         u8g2_FuelFlow.drawStr(0, 15, "BMS NOT CONNECTED....");
       } while (u8g2_FuelFlow.nextPage());
+      #endif
       #else
       u8g2_DED.clearBuffer();
       u8g2_DED.drawStr(0, 15, "Not Connected....");
       u8g2_DED.sendBuffer();
-
+#ifdef FBAC_FF_1306
       u8g2_FuelFlow.setFont(u8g2_font_5x7_tr); 
       u8g2_FuelFlow.clearBuffer();
       u8g2_FuelFlow.drawStr(0, 15, "BMS Not Connected....");
       u8g2_FuelFlow.sendBuffer();
       #endif
-      leds[0] = CRGB::Red;
-       FastLED.show();
+      #endif
+      
    }
      
 }
