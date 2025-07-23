@@ -9,7 +9,7 @@
 #ifndef FBAC_FONT_U8G2
 #define FBAC_FONT_U8G2
 #endif
-
+#define DED_H_CONST 2
 // --- Detect board and set appropriate constructor ---
 #if defined(ESP32)
 U8G2_SSD1322_NHD_256X64_F_4W_HW_SPI u8g2_DED(U8G2_R0, /* cs=*/ 5, /* dc=*/ 16, /* reset=*/ 17); // SCL 18  SDA 23 
@@ -55,7 +55,7 @@ U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2_FuelFlow(U8G2_R0, /* reset=*/ U8X8_PIN_
 //FBAC Fonts 
 #ifdef FBAC_FONT_U8G2
   #include "falconded_font.h"
-  #define SD1322_FONT u8g2_font_FalconDED_18_tf
+  #define SD1322_FONT FalconDED_wide
   #define SD1306_FONT u8g2_font_FBAC_DED_FONT_5x8_tf
 #ifdef U8G2_HAVE_HW_SPI
   #include <SPI.h>

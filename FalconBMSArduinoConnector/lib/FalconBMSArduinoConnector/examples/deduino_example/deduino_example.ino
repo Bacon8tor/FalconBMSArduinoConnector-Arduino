@@ -45,9 +45,9 @@ void printDED() {
   do {
     for (int i = 0; i < 5; i++) {
       const char* line = bms.dedLines[i];
-      int x = (256 - u8g2_DED.getUTF8Width(line)) / 2;
+     // int x = (256 - u8g2_DED.getUTF8Width(line)) / 2;
       int y = lineHeight * i + charHeight;
-      u8g2_DED.drawStr(x, y, line);
+      u8g2_DED.drawStr(DED_H_CONST, y, line);
     }
   } while (u8g2_DED.nextPage());
   delay(500);
@@ -55,9 +55,9 @@ void printDED() {
   u8g2_DED.clearBuffer();
   for (int i = 0; i < 5; i++) {
     const char* line = bms.dedLines[i];
-    int x = (256 - u8g2_DED.getUTF8Width(line)) / 2;
+   // int x = (256 - u8g2_DED.getUTF8Width(line)) / 2;
     int y = lineHeight * i + charHeight;
-    u8g2_DED.drawStr(x, y, line);
+    u8g2_DED.drawStr(DED_H_CONST, y, line);
   }
   u8g2_DED.sendBuffer();
 #endif
