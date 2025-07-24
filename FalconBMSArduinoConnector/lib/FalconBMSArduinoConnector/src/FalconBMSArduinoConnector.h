@@ -7,6 +7,7 @@
 #include "LightBits3.h"
 #include "BlinkBits.h"
 #include "EcmBits.h"
+#include "InstrLight.h"
 #include "FBAC_Config.h"
 
 
@@ -44,6 +45,10 @@ public:
   void getexternalFuel();
   void getEPUFuel();
   void getHYDPress();
+  void getCMDSMode();
+  void getInstrLight(); //Call 
+
+  
 
   //DED
   char dedLines[5][27];
@@ -86,7 +91,14 @@ public:
   //HYD Press
   float hydPressA;
   float hydPressB;
+
+  //CMDS Mode
+  int cmdsMode;
   
+  //InstrLight Status
+  int getInstrLightStatus(); //returns status 0 = off 1 = dim 2 = brt
+  
+
   // Light bit getters
   bool isMasterCaution();
   bool isTF();
@@ -209,14 +221,15 @@ private:
   uint32_t lightBits2;
   uint32_t lightBits3;
   uint32_t blinkBits;
-  uint32_t instrLight;
+  byte instrLight;
+  int instrLightStatus;
   
   uint8_t buffer[134];
   uint8_t idx;
   bool isReading;
 
   bool connected;
-    const unsigned long timeoutMs = 1000;
+  const unsigned long timeoutMs = 1000;
 
   void handlePacket(uint8_t type, uint8_t* data, uint8_t len);
   
@@ -230,6 +243,7 @@ private:
   void decodeDED(uint8_t* data, uint8_t len);
   void decodePFL(uint8_t* data, uint8_t len);
 
+  
 
   // Bit flags
   bool _bits[32];

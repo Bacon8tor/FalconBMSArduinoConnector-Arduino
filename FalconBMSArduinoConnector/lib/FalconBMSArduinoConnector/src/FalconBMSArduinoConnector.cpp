@@ -97,6 +97,9 @@ void FalconBMSArduinoConnector::getOilPressure(){
   sendCommand(0x14);
 }
 
+void FalconBMSArduinoConnector::getInstrLight(){
+  sendCommand(0x07);
+}
 void FalconBMSArduinoConnector::getOilPressure2(){
   sendCommand(0x15);
 }
@@ -140,6 +143,16 @@ void FalconBMSArduinoConnector::getEPUFuel(){
 void FalconBMSArduinoConnector::getHYDPress(){
   sendCommand(0x25);
   sendCommand(0x26);
+}
+
+void FalconBMSArduinoConnector::getCMDSMode(){
+  sendCommand(0x27);
+      //  CmdsOFF = 0,
+      //   CmdsSTBY = 1,
+      //   CmdsMAN = 2,
+      //   CmdsSEMI = 3,
+      //   CmdsAUTO = 4,
+      //   CmdsBYP = 5,
 }
 
 //Packet handling
@@ -242,6 +255,9 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
     case 0x26:
       memcpy(&hydPressB,data,sizeof(float));
     break;
+    case 0x27:
+      memcpy(&cmdsMode,data,sizeof(int));
+    break;
     case 0xA5: // Handshake byte?
       _serial->write(0x5A);
       connected = true;
@@ -339,8 +355,18 @@ switch(light){
 
 void FalconBMSArduinoConnector::setInstrLights(){
   //check instrlights  0 = off, 1 = dim , 2 = bright
+  if(instrLight  == INSTR_LIGHT_DIM){
+    instrLightStatus = 1;
+  } else if(instrLight  == INSTR_LIGHT_BRT){
+    instrLightStatus = 2;
+  }else {
+    instrLightStatus = 0;
+  }
 }
 
+int FalconBMSArduinoConnector::getInstrLightStatus(){
+  return instrLightStatus;
+}
 void FalconBMSArduinoConnector::decodePFL(uint8_t* data, uint8_t len) {
   if (len < 120) return; // Must be 5 lines x 24 chars
 
