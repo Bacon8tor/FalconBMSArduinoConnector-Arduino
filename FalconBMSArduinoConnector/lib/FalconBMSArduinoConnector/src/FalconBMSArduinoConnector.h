@@ -6,6 +6,7 @@
 #include "LightBits2.h"
 #include "LightBits3.h"
 #include "BlinkBits.h"
+#include "EcmBits.h"
 #include "FBAC_Config.h"
 
 
@@ -29,6 +30,8 @@ public:
   void getFuelFlow();
   void getPFL();
   void getChaffFlareCount();
+  void getECMBits();
+  int getECMStatus(int ecmLight);
   
   //DED
   char dedLines[5][27];
@@ -43,6 +46,9 @@ public:
 
   //RPM 
   float rpm;
+
+  //ECM
+  uint32_t ecm[4];
 
   // Light bit getters
   bool isMasterCaution();

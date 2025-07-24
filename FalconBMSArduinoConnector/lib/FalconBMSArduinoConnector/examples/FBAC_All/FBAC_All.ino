@@ -1,7 +1,7 @@
 #define FBAC_DED_1322 // creates u8g2_DED 
 //#define FBAC_PFL_1309 // creates u8g2_PFL
 //#define FBAC_FF_1306  // creates u8g2_FuelFlow
-//#define FBAC_FASTLED // creates FastLED object and related functions
+#define FBAC_FASTLED // creates FastLED object and related functions
 
 
 #include <Arduino.h>

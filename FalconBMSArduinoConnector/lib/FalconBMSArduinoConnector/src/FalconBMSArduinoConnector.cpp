@@ -21,7 +21,7 @@ void FalconBMSArduinoConnector::begin(HardwareSerial& serial, uint32_t baud) {
   _serial = &serial;
   _serial->begin(baud);
   while (!_serial);
- // connected = true;
+  //connected = true;
 }
 
 bool FalconBMSArduinoConnector::isConnected() {
@@ -89,6 +89,9 @@ void FalconBMSArduinoConnector::getFuelFlow(){
   sendCommand(0x06);
 }
 
+void FalconBMSArduinoConnector::getECMBits(){
+    sendCommand(0x13);
+}
 //Packet handling
 void FalconBMSArduinoConnector::sendCommand(uint8_t commandByte) {
   _serial->write(commandByte);
@@ -140,6 +143,16 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
     break;
     case 0x12:
       memcpy(&rpm,data,sizeof(float));
+    break;
+    case 0x13:
+      for (uint8_t i = 0; i < 4; i++) {
+      ecm[i] =
+          ((uint32_t)data[i * 4 + 0]) |
+          ((uint32_t)data[i * 4 + 1] << 8) |
+          ((uint32_t)data[i * 4 + 2] << 16) |
+          ((uint32_t)data[i * 4 + 3] << 24);
+    }
+    
     break;
     case 0xA5: // Handshake byte?
       _serial->write(0x5A);
@@ -200,6 +213,41 @@ void FalconBMSArduinoConnector::waitForPacket(){
 }
 
 // Assign Data
+int FalconBMSArduinoConnector::getECMStatus(int ecmLight){
+
+uint32_t light = ecm[ecmLight];
+switch(light){
+  case ECM_UNPRESSED_NO_LIT:
+  return 0;
+  break;
+  case ECM_UNPRESSED_ALL_LIT:
+  return 1;
+  break;
+  case ECM_PRESSED_NO_LIT:
+  return 2;
+  break;
+  case ECM_PRESSED_STANDBY:
+  return 3;
+  break;
+  case ECM_PRESSED_ACTIVE:
+  return 4;
+  break;
+  case ECM_PRESSED_TRANSMIT:
+  return 5;
+  break;
+  case ECM_PRESSED_FAIL:
+  return 6;
+  break;
+  case ECM_PRESSED_ALL_LIT:
+  return 7;
+  break;
+  default:
+  return 0;
+  break;
+}
+
+}
+
 void FalconBMSArduinoConnector::setInstrLights(){
   //check instrlights  0 = off, 1 = dim , 2 = bright
 }
