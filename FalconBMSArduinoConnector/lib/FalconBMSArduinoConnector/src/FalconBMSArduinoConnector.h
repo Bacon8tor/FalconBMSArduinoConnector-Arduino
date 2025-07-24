@@ -32,13 +32,28 @@ public:
   void getChaffFlareCount();
   void getECMBits();
   int getECMStatus(int ecmLight);
-  
+  void getOilPressure();
+  void getOilPressure2();
+  void getNozzlePos();
+  void getNozzlePos2();
+  void getFTIT();
+  void getFTIT2();
+  void getCabinAlt();
+  void getKIAS();
+  void getinternalFuel();
+  void getexternalFuel();
+  void getEPUFuel();
+  void getHYDPress();
+
   //DED
   char dedLines[5][27];
   char pflLines[5][27];
   
   //Fuel
   float fuelFlow;
+  float internalFuel;
+  float externalFuel;
+  float epuFuel;  
 
   //Chaff/Flare
   float chaffCount;
@@ -50,6 +65,28 @@ public:
   //ECM
   uint32_t ecm[4];
 
+  //Oil Press
+  float oilPress;
+  float oilPress2;
+
+  //Nozzle Pos
+  float nozzlePos;
+  float nozzlePos2;
+
+  //FTIT
+  float ftit;
+  float ftit2;
+
+  //Cabin Alt 
+  float cabinAlt;
+
+  //Airspeed 
+  float kias;
+
+  //HYD Press
+  float hydPressA;
+  float hydPressB;
+  
   // Light bit getters
   bool isMasterCaution();
   bool isTF();

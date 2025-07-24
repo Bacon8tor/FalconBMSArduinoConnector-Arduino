@@ -92,6 +92,56 @@ void FalconBMSArduinoConnector::getFuelFlow(){
 void FalconBMSArduinoConnector::getECMBits(){
     sendCommand(0x13);
 }
+
+void FalconBMSArduinoConnector::getOilPressure(){
+  sendCommand(0x14);
+}
+
+void FalconBMSArduinoConnector::getOilPressure2(){
+  sendCommand(0x15);
+}
+
+void FalconBMSArduinoConnector::getNozzlePos(){
+  sendCommand(0x16);
+}
+
+void FalconBMSArduinoConnector::getNozzlePos(){
+  sendCommand(0x17);
+}
+
+void FalconBMSArduinoConnector::getFTIT(){
+  sendCommand(0x18);
+}
+
+void FalconBMSArduinoConnector::getFTIT2(){
+  sendCommand(0x19);
+}
+
+void FalconBMSArduinoConnector::getCabinAlt(){
+  sendCommand(0x20);
+}
+
+void FalconBMSArduinoConnector::getKIAS(){
+  sendCommand(0x21);
+}
+
+void FalconBMSArduinoConnector::getinternalFuel(){
+  sendCommand(0x22);
+}
+
+void FalconBMSArduinoConnector::getexternalFuel(){
+  sendCommand(0x23);
+}
+
+void FalconBMSArduinoConnector::getEPUFuel(){
+  sendCommand(0x24);
+}
+
+void FalconBMSArduinoConnector::getHYDPress(){
+  sendCommand(0x25);
+  sendCommand(0x26);
+}
+
 //Packet handling
 void FalconBMSArduinoConnector::sendCommand(uint8_t commandByte) {
   _serial->write(commandByte);
@@ -152,7 +202,45 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
           ((uint32_t)data[i * 4 + 2] << 16) |
           ((uint32_t)data[i * 4 + 3] << 24);
     }
-    
+    break;
+    case 0x14:
+      memcpy(&oilPress,data,sizeof(float));
+    break;
+    case 0x15:
+      memcpy(&oilPress2,data,sizeof(float));
+    break;
+    case 0x16:
+      memcpy(&nozzlePos,data,sizeof(float));
+    break;
+    case 0x17:
+      memcpy(&nozzlePos2,data,sizeof(float));
+    break;
+    case 0x18:
+      memcpy(&ftit,data,sizeof(float));
+    break;
+    case 0x19:
+      memcpy(&ftit2,data,sizeof(float));
+    break;
+    case 0x20:
+      memcpy(&cabinAlt,data,sizeof(float));
+    break;
+    case 0x21:
+      memcpy(&kias,data,sizeof(float));
+    break;
+    case 0x22:
+      memcpy(&internalFuel,data,sizeof(float));
+    break;
+    case 0x23:
+      memcpy(&externalFuel,data,sizeof(float));
+    break;
+    case 0x24:
+      memcpy(&epuFuel,data,sizeof(float));
+    break;
+    case 0x25:
+      memcpy(&hydPressA,data,sizeof(float));
+    break;
+    case 0x26:
+      memcpy(&hydPressB,data,sizeof(float));
     break;
     case 0xA5: // Handshake byte?
       _serial->write(0x5A);
@@ -213,6 +301,7 @@ void FalconBMSArduinoConnector::waitForPacket(){
 }
 
 // Assign Data
+
 int FalconBMSArduinoConnector::getECMStatus(int ecmLight){
 
 uint32_t light = ecm[ecmLight];

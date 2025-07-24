@@ -115,110 +115,108 @@ for(int i =0; i < 4;i++){
     }
 ```
 
+## Class API Reference
 
-## Available Getter Functions
 
-### LightBits
+```cpp
+void checkAllLights();
+void getLightBits(int lb);
+void getblinkBits();
+void getDED();
+void getFuelFlow();
+void getPFL();
+void getChaffFlareCount();
+void getECMBits();
+int getECMStatus(int ecmLight);
+void getOilPressure();
+void getOilPressure2();
+void getNozzlePos();
+void getNozzlePos2();
+void getFTIT();
+void getFTIT2();
+void getCabinAlt();
+void getKIAS();
+void getinternalFuel();
+void getexternalFuel();
+void getEPUFuel();
+void getHYDPress();
+```
 
-* `isMasterCaution()`
-* `isTF()`
-* `isOxyBrow()`
-* `isEquipHot()`
-* `isOnGround()`
-* `isEngFire()`
-* `isConfig()`
-* `isHyd()`
-* `isFlcsABCD()`
-* `isFlcs()`
-* `isCan()`
-* `isTLConfig()`
-* `isAOAAbove()`
-* `isAOAOn()`
-* `isAOABelow()`
-* `isRefuelRDY()`
-* `isRefuelAR()`
-* `isRefuelDSC()`
-* `isFltControlSys()`
-* `isLEFlaps()`
-* `isEngineFault()`
-* `isOverheat()`
-* `isFuelLow()`
-* `isAvionics()`
-* `isRadarAlt()`
-* `isIFF()`
-* `isECM()`
-* `isHook()`
-* `isNWSFail()`
-* `isCabinPress()`
-* `isAutoPilotOn()`
-* `isTFRSTBY()`
 
-### LightBits2
+### DED and PFL
 
-* `isHandOff()`
-* `isLaunch()`
-* `isPriMode()`
-* `isNaval()`
-* `isUnk()`
-* `isTgtSep()`
-* `isGo()`
-* `isNoGo()`
-* `isDegr()`
-* `isRdy()`
-* `isChaffLo()`
-* `isFlareLo()`
-* `isAuxSrch()`
-* `isAuxAct()`
-* `isAuxLow()`
-* `isAuxPwr()`
-* `isEcmPwr()`
-* `isEcmFail()`
-* `isFwdFuelLow()`
-* `isAftFuelLow()`
-* `isEPUOn()`
-* `isJFSOn()`
-* `isSEC()`
-* `isOxyLow()`
-* `isProbeHeat()`
-* `isSeatArm()`
-* `isBUC()`
-* `isFuelOilHot()`
-* `isAntiSkid()`
-* `isTFREngaged()`
-* `isGearHandle()`
-* `isEngine()`
+```cpp
+char dedLines[5][27];
+char pflLines[5][27];
+```
 
-### LightBits3
+### Fuel
 
-* `isFlcsPmg()`
-* `isMainGen()`
-* `isStbyGen()`
-* `isEpuGen()`
-* `isEpuPmg()`
-* `isToFlcs()`
-* `isFlcsRly()`
-* `isBatFail()`
-* `isHydrazine()`
-* `isAir()`
-* `isElecFault()`
-* `isLefFault()`
-* `isOnGround3()`
-* `isFlcsBitRun()`
-* `isFlcsBitFail()`
-* `isDbuWarn()`
-* `isNoseGearDown()`
-* `isLeftGearDown()`
-* `isRightGearDown()`
-* `isParkBrakeOn()`
-* `isPowerOff()`
-* `isCadc()`
-* `isSpeedBrake()`
-* `isSysTest()`
-* `isMCAnnounced()`
-* `isMLGWOW()`
-* `isNLGWOW()`
-* `isATFNotEngaged()`
-* `isInletIcing()`
+```cpp
+float fuelFlow;
+float internalFuel;
+float externalFuel;
+float epuFuel;
+```
+
+### Chaff / Flare
+
+```cpp
+float chaffCount;
+float flareCount;
+```
+
+### RPM
+
+```cpp
+float rpm;
+```
+
+### ECM
+
+```cpp
+uint32_t ecm[4];
+```
+
+### Oil Pressure
+
+```cpp
+float oilPress;
+float oilPress2;
+```
+
+### Nozzle Position
+
+```cpp
+float nozzlePos;
+float nozzlePos2;
+```
+
+### FTIT (Fan Turbine Inlet Temperature)
+
+```cpp
+float ftit;
+float ftit2;
+```
+
+### Cabin Altitude
+
+```cpp
+float cabinAlt;
+```
+
+### Airspeed
+
+```cpp
+float kias;
+```
+
+### Hydraulic Pressure
+
+```cpp
+float hydPressA;
+float hydPressB;
+```
 
 ## How It Works
 
