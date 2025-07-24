@@ -277,6 +277,7 @@ void FalconBMSArduinoConnector::checkAllLights(){
     getLightBits(2);
     getLightBits(3);
     getblinkBits(); //blink
+    getECMBits();
 }
 
 void FalconBMSArduinoConnector::checkLightBits() {

@@ -55,6 +55,7 @@ void loop() {
             case 6:
                 ecm[i] = CRGB::Red;
             break;
+            //pressed all lit
             case 7:
                 ecm[i] = CRGB::Magenta;
             break;

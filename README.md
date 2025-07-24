@@ -63,11 +63,58 @@ Serial.println(bms.dedLines[0]);
 ### LightBits Example
 
 ```cpp
-bms.checkLightbits(1); // checks Lightbits
+bms.getLightbits(1); // checks Lightbits
 if (bms.isMasterCaution()) {
   digitalWrite(ledPin, HIGH);
 }
 ```
+### ECM Example 
+
+```cpp
+bms.getECMBits();
+//Go Over Every Button 
+for(int i =0; i < 4;i++){
+        switch(bms.getECMStatus(i))
+        {
+            //unpressed no lit
+            case 0:
+                //turn all leds off
+            break;
+            //unpress all lit 
+            case 1:
+                //turn all leds on
+            //pressed no lit 
+            case 2:
+                //turn all leds off
+            break;
+            //pressed standy
+            case 3:
+                //turn standby led on 
+            break;
+            // pressed active
+            case 4:
+                //turn active led on 
+            break;
+            //pressed transmit
+            case 5:
+                //turn on transmit led 
+            break;
+            //pressed fail 
+            case 6:
+                //turn on fail led 
+            break;
+            //Pressed all lit
+            case 7:
+                //turn all leds on 
+            break;
+            default:
+               //default off
+            break;
+        }
+        
+    }
+```
+
 
 ## Available Getter Functions
 
@@ -177,9 +224,9 @@ if (bms.isMasterCaution()) {
 
 This library listens for incoming serial data in the Falcon BMS shared memory format. A corresponding PC app should send LightBits/DED/FlightData packets over serial. The Arduino then parses and stores relevant data in memory-accessible variables and methods.
 
-## Notes
-
-* Call `update()` inside `loop()` to continuously parse data
+* Call `bms.update()` inside `loop()` to verify connection status.
+* In your loop you will wan tto check `bms.isConnected()` this will return `true` or `false`, after this evulates true we start sending commands.
+* Data Call: Make a data call like `bms.checkAllLights();` or `bms.getDED()` this is spilt up, to not call unneccessary data, call what you need. 
 * Ensure your PC-side application is sending compatible packets
 
 
