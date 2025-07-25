@@ -42,13 +42,15 @@ void rainbow() {
 void setup()
 {
   
-  bms.begin();
+  Serial.begin(115200);
+
+  bms.begin(Serial);
+
  
 #ifdef FBAC_FASTLED
   FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
   FastLED.setBrightness(20);
 #endif
-  bms.begin();
   
   u8g2_DED.begin();
   #ifdef FBAC_FF_1306

@@ -13,8 +13,10 @@ FalconBMSArduinoConnector bms;
 
 void setup() {
 
+  Serial.begin(115200);
 
-  bms.begin();
+  bms.begin(Serial);
+
 
   u8g2_DED.begin();
 

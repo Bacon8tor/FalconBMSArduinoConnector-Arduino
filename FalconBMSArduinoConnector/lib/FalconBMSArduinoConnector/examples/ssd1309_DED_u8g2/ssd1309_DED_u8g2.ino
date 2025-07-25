@@ -18,7 +18,10 @@ void setup() {
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, LOW);
 
-  bms.begin();
+   Serial.begin(115200);
+
+  bms.begin(Serial);
+
 
   u8g2_DED.setI2CAddress(0x3C << 1);
   u8g2_DED.begin();

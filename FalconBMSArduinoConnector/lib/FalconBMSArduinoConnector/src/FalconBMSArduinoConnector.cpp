@@ -21,6 +21,13 @@ void FalconBMSArduinoConnector::begin(Stream& serial, uint32_t baud) {
   // Do NOT call begin() on _serial here
   // Do NOT wait for serial connection here
 }
+/* DEPRECATED FUNCTION KEEPING JUST IN CASE */
+// void FalconBMSArduinoConnector::begin(HardwareSerial& serial, uint32_t baud) {
+//   _serial = &serial;
+//   _serial->begin(baud);
+//   while (!_serial);
+//  // connected = true;
+// }
 
 bool FalconBMSArduinoConnector::isConnected() {
   return connected;
