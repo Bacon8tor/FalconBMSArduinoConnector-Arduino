@@ -18,6 +18,7 @@ void setup() {
 void loop() {
   bms.update();
   if (bms.isConnected()) {
+    bms.checkAllLights();
     digitalWrite(ledPin, bms.isMasterCaution() ? HIGH : LOW); // CHECKS WHETHER isMasterCaution true or false then sets high or low 
     
   } else {
