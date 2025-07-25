@@ -19,7 +19,8 @@ U8G2_SSD1322_NHD_256X64_F_4W_HW_SPI u8g2_DED(U8G2_R0, /* clock=*/14, /* data=*/1
 U8G2_SSD1322_NHD_256X64_1_4W_SW_SPI u8g2_DED(U8G2_R0, /* clock=*/13, /* data=*/11, /* cs=*/8, /* dc=*/9, /* reset=*/7);
 #elif defined(__AVR_ATmega2560__) // Mega 2560
 U8G2_SSD1322_NHD_256X64_F_4W_HW_SPI u8g2_DED(U8G2_R0, /* cs=*/53, /* dc=*/49, /* reset=*/48); 
-
+#elif defined(__AVR_ATmega32U4__)
+U8G2_SSD1322_NHD_256X64_1_4W_HW_SPI u8g2_DED(U8G2_R0, /* cs=*/10, /* dc=*/9, /* reset=*/8);
 #endif
 
 #endif

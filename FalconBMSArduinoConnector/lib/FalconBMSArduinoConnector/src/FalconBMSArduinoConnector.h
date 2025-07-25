@@ -21,7 +21,8 @@ public:
   bool isConnected();
   unsigned long lastSerialActivity;
   
-  void begin(HardwareSerial& serial = Serial, uint32_t baud = 115200);
+  void begin(Stream& serial = Serial, uint32_t baud = 115200);
+  //void begin(HardwareSerial& serial = Serial, uint32_t baud = 115200);
   
   void update();  // Call in loop()
   void checkAllLights();
@@ -216,7 +217,8 @@ public:
   bool isECMOperBlinking();
 
 private:
-  HardwareSerial* _serial;
+Stream* _serial;
+//  HardwareSerial* _serial;
   uint32_t lightBits;
   uint32_t lightBits2;
   uint32_t lightBits3;

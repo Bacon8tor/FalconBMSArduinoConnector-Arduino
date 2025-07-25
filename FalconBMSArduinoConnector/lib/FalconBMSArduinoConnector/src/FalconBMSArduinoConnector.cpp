@@ -16,12 +16,10 @@ FalconBMSArduinoConnector::FalconBMSArduinoConnector()
   memset(_bits, 0, sizeof(_bits));
 }
 
-
-void FalconBMSArduinoConnector::begin(HardwareSerial& serial, uint32_t baud) {
+void FalconBMSArduinoConnector::begin(Stream& serial, uint32_t baud) {
   _serial = &serial;
-  _serial->begin(baud);
-  while (!_serial);
-  //connected = true;
+  // Do NOT call begin() on _serial here
+  // Do NOT wait for serial connection here
 }
 
 bool FalconBMSArduinoConnector::isConnected() {
@@ -108,7 +106,7 @@ void FalconBMSArduinoConnector::getNozzlePos(){
   sendCommand(0x16);
 }
 
-void FalconBMSArduinoConnector::getNozzlePos(){
+void FalconBMSArduinoConnector::getNozzlePos2(){
   sendCommand(0x17);
 }
 
