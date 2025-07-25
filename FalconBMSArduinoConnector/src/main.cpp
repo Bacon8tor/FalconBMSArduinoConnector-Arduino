@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 
 #define FBAC_DED_1322
 #include <FalconBMSArduinoConnector.h>
@@ -117,10 +118,30 @@ void checkButtons(){
       lastState[btnIndex] = currentState;
     }
   }
+=======
+#include <FalconBMSArduinoConnector.h>
+
+FalconBMSArduinoConnector bms;
+
+#if defined(ESP32)
+  const int ledPin = 2;  // Most ESP32 boards use GPIO2 for the onboard LED
+#else
+  const int ledPin = LED_BUILTIN;  // Fallback for Arduino Uno, Mega, Nano etc.
+#endif
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+  digitalWrite(ledPin, LOW);
+  
+  Serial.begin(115200);
+
+  bms.begin(Serial);
+>>>>>>> Stashed changes
 }
 
 void loop() {
   bms.update();
+<<<<<<< Updated upstream
       if (bms.isConnected()) {
      
         bms.getDED();
@@ -142,4 +163,14 @@ void loop() {
       }
   checkButtons();
  // delay(5); // Small debounce and bus relief
+=======
+  if (bms.isConnected()) {
+    bms.checkAllLights();
+    digitalWrite(ledPin, bms.isMasterCaution() ? HIGH : LOW); // CHECKS WHETHER isMasterCaution true or false then sets high or low 
+    
+  } else {
+    digitalWrite(ledPin, LOW);
+  }
+ 
+>>>>>>> Stashed changes
 }
