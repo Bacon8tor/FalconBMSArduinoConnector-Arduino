@@ -231,7 +231,7 @@ Stream* _serial;
   bool isReading;
 
   bool connected;
-  const unsigned long timeoutMs = 1000;
+  const unsigned long timeoutMs = 5000;
 
   void handlePacket(uint8_t type, uint8_t* data, uint8_t len);
   

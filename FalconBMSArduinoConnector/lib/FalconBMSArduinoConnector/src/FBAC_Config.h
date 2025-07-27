@@ -11,8 +11,11 @@
 #endif
 #define DED_H_CONST 2
 // --- Detect board and set appropriate constructor ---
-#if defined(ESP32)
-U8G2_SSD1322_NHD_256X64_F_4W_HW_SPI u8g2_DED(U8G2_R0, /* cs=*/ 5, /* dc=*/ 16, /* reset=*/ 17); // SCL 18  SDA 23 
+#if defined(ARDUINO_ESP32C3_DEV)
+// ESP32-C3 SuperMini (or similar)
+U8G2_SSD1322_NHD_256X64_F_4W_HW_SPI u8g2_DED(U8G2_R0, /* cs=*/7, /* dc=*/8, /* reset=*/9);
+#elif defined(ESP32)
+U8G2_SSD1322_NHD_256X64_F_4W_HW_SPI u8g2_DED(U8G2_R2, /* cs=*/ 5, /* dc=*/ 16, /* reset=*/ 17); // SCL 18  SDA 23 
 #elif defined(ESP8266)
 U8G2_SSD1322_NHD_256X64_F_4W_HW_SPI u8g2_DED(U8G2_R0, /* clock=*/14, /* data=*/13, /* cs=*/15, /* dc=*/12, /* reset=*/2);
 #elif defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__) // Uno, Nano
@@ -20,7 +23,7 @@ U8G2_SSD1322_NHD_256X64_1_4W_SW_SPI u8g2_DED(U8G2_R0, /* clock=*/13, /* data=*/1
 #elif defined(__AVR_ATmega2560__) // Mega 2560
 U8G2_SSD1322_NHD_256X64_F_4W_HW_SPI u8g2_DED(U8G2_R0, /* cs=*/53, /* dc=*/49, /* reset=*/48); 
 #elif defined(__AVR_ATmega32U4__)
-U8G2_SSD1322_NHD_256X64_1_4W_HW_SPI u8g2_DED(U8G2_R0, /* cs=*/10, /* dc=*/9, /* reset=*/8);
+U8G2_SSD1322_NHD_256X64_1_4W_HW_SPI u8g2_DED(U8G2_R2, /* cs=*/10, /* dc=*/9, /* reset=*/8);
 #endif
 
 #endif
