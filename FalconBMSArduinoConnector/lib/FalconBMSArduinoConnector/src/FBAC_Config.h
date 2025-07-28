@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 
+
 //SD1322 OLED 256*64 (deduino compatible?? not confirmed pin changes may be needed)
 #ifdef FBAC_DED_1322
 #include <U8g2lib.h>
@@ -52,8 +53,19 @@ U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2_PFL(U8G2_R0, /* reset=*/ U8X8_PIN_NONE)
 #include <U8g2lib.h>
 #ifndef FBAC_FONT_U8G2
 #define FBAC_FONT_U8G2
+
 #endif
-U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2_FuelFlow(U8G2_R0, /* reset=*/ U8X8_PIN_NONE);
+U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2_FuelFlow(U8G2_R0, U8X8_PIN_NONE);
+#endif
+
+//Fuel Flow OLED 128*64 
+#ifdef FBAC_FF_1107
+#include <U8g2lib.h>
+#ifndef FBAC_FONT_U8G2
+#define FBAC_FONT_U8G2
+
+#endif
+U8G2_SH1107_64X128_2_HW_I2C u8g2_FuelFlow(U8G2_R1, U8X8_PIN_NONE);
 #endif
 
 //FBAC Fonts 
@@ -61,6 +73,7 @@ U8G2_SSD1306_128X64_NONAME_F_HW_I2C u8g2_FuelFlow(U8G2_R0, /* reset=*/ U8X8_PIN_
   #include "falconded_font.h"
   #define SD1322_FONT FalconDED_wide
   #define SD1306_FONT u8g2_font_FBAC_DED_FONT_5x8_tf
+  #define ffFont fuelflow_u8g2
 #ifdef U8G2_HAVE_HW_SPI
   #include <SPI.h>
 #endif

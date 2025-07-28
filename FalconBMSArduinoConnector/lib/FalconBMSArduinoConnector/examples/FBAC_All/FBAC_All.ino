@@ -1,17 +1,17 @@
 #define FBAC_DED_1322 // creates u8g2_DED 
+#define FBAC_FF_1306  // creates u8g2_FuelFlow
 //#define FBAC_PFL_1309 // creates u8g2_PFL
-//#define FBAC_FF_1306  // creates u8g2_FuelFlow
 #define FBAC_FASTLED // creates FastLED object and related functions
 
 
 #include <Arduino.h>
 #include <FalconBMSArduinoConnector.h>
 
-
 // Detect low-RAM AVR board (Uno/Nano)
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__) || defined(__AVR_ATmega32U4__)
   #define USE_PAGED_MODE
 #endif
+
 
 #ifdef FBAC_FASTLED
 #define NUM_LEDS 32
@@ -22,6 +22,27 @@ CRGB leds[NUM_LEDS];
 FalconBMSArduinoConnector bms;
 
 extern uint8_t SmallFont[];
+
+#ifdef FBAC_FF_1306
+char FuelFlow[6]; // +1 for null terminator
+#define FF_CHAR_W 20
+#define FF_CHAR_H 30
+#define FF_H_CONST 0
+#define FF_V_CONST 0
+
+#define FFI_SCREEN_W 128
+#define FFI_SCREEN_H 64
+const unsigned short FFI_SCREEN_W_MID = FFI_SCREEN_W / 2;
+const unsigned short FFI_SCREEN_H_MID = 40;
+
+const unsigned short FF_POS_X_1 = int(FFI_SCREEN_W_MID - ((FF_CHAR_W * 7) / 2)) + ((FF_CHAR_W + 1) * 1) + FF_H_CONST;
+const unsigned short FF_POS_X_2 = int(FFI_SCREEN_W_MID - ((FF_CHAR_W * 7) / 2)) + ((FF_CHAR_W + 1) * 2) + FF_H_CONST;
+const unsigned short FF_POS_X_3 = int(FFI_SCREEN_W_MID - ((FF_CHAR_W * 7) / 2)) + ((FF_CHAR_W + 1) * 3) + FF_H_CONST;
+const unsigned short FF_POS_X_4 = int(FFI_SCREEN_W_MID - ((FF_CHAR_W * 7) / 2)) + ((FF_CHAR_W + 1) * 4) + FF_H_CONST;
+const unsigned short FF_POS_X_5 = int(FFI_SCREEN_W_MID - ((FF_CHAR_W * 7) / 2)) + ((FF_CHAR_W + 1) * 5) + FF_H_CONST;
+const unsigned short FF_POS_Y = FFI_SCREEN_H_MID + FF_V_CONST;
+#endif
+
 #ifdef FBAC_FASTLED
 void rainbow() {
   // Example: rainbow cycle
@@ -39,6 +60,7 @@ void rainbow() {
   FastLED.clear();
 }
 #endif
+
 void setup()
 {
   
@@ -47,40 +69,48 @@ void setup()
   bms.begin(Serial);
 
  
-#ifdef FBAC_FASTLED
-  FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
-  FastLED.setBrightness(20);
-#endif
+
+  #ifdef FBAC_DED_1322
+    u8g2_DED.begin();
+  #endif
   
-  u8g2_DED.begin();
   #ifdef FBAC_FF_1306
-  u8g2_FuelFlow.setI2CAddress(0x3D << 1);
   u8g2_FuelFlow.begin();
   #endif
   #ifdef USE_PAGED_MODE
-  u8g2_DED.firstPage();
-  do {
-    u8g2_DED.drawStr(0, 10, "STARTING...");
-  } while (u8g2_DED.nextPage());
-  #ifdef FBAC_FF_1306
-  u8g2_FuelFlow.firstPage();
-  do {
-    u8g2_FuelFlow.drawStr(0, 10, "STARTING...");
-  } while (u8g2_FuelFlow.nextPage());
-  #endif
-#else
-  u8g2_DED.setFont(u8g2_font_5x7_tr); 
+    #ifdef FBAC_DED_1322
+      u8g2_DED.firstPage();
+      do {
+        u8g2_DED.drawStr(0, 10, "STARTING...");
+      } while (u8g2_DED.nextPage());
+    #endif
+    #ifdef FBAC_FF_1306
+      u8g2_FuelFlow.firstPage();
+      do {
+          u8g2_FuelFlow.setFont(ffFont); // Nice readable default font
+          u8g2_FuelFlow.setFontPosTop();
+          u8g2_FuelFlow.setCursor(15, 18);
+          u8g2_FuelFlow.print("FUELFLOW");
+      } while (u8g2_FuelFlow.nextPage());
+    #endif
+  #else
+  u8g2_DED.setFont(SD1322_FONT); 
   u8g2_DED.clearBuffer();
   u8g2_DED.drawStr(0, 10, "Starting...");
   u8g2_DED.sendBuffer();
   #ifdef FBAC_FF_1306
-  u8g2_FuelFlow.setFont(u8g2_font_5x7_tr); 
+  u8g2_FuelFlow.setFont(ffFont); 
   u8g2_FuelFlow.clearBuffer();
-  u8g2_FuelFlow.drawStr(0, 10, "Starting...");
+  u8g2_FuelFlow.setFontPosTop();
+          u8g2_FuelFlow.setCursor(15, 18);
+          u8g2_FuelFlow.print("FUELFLOW");
   u8g2_FuelFlow.sendBuffer();
   #endif
 #endif
+
 #ifdef FBAC_FASTLED
+  FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);
+  FastLED.setBrightness(20);
   rainbow();
 #endif
 }
@@ -157,32 +187,52 @@ void printDED() {
 }
 
 #ifdef FBAC_FF_1306
-void printFuelFlow() {
-    char buffer[16];
+void setFuelFlowValue(float flow) {
+  int intFlow = constrain(round(flow), 0, 99999);
+  snprintf(FuelFlow, sizeof(FuelFlow), "%05d", intFlow);
+}
 
-    // Truncate fuel flow to the nearest lower hundred
-    int flow = ((int)bms.fuelFlow / 100) * 100;
+void drawFF() {
+  if (FuelFlow[2] == 0) return;
 
-    // Format as 5-digit number with leading zeros
-    snprintf(buffer, sizeof(buffer), "%05d", flow);
+  char FFh = FuelFlow[2];
+  char FFhPriv = (FFh == '0') ? '9' : FFh - 1;
+  char FFhNext = (FFh == '9') ? '0' : FFh + 1;
+  char FFhTwoOver = (FFhNext == '9') ? '0' : FFhNext + 1;
 
-    #ifdef USE_PAGED_MODE
-      u8g2_FuelFlow.firstPage();
-      do {
-        u8g2_FuelFlow.setFont(u8g2_font_logisoso32_tf); // Large readable digits
-        int width = u8g2_FuelFlow.getStrWidth(buffer);
-        u8g2_FuelFlow.drawStr((128 - width) / 2, 50, buffer);
-      } while (u8g2_FuelFlow.nextPage());
-    #else 
-      u8g2_FuelFlow.clearBuffer();
-      u8g2_FuelFlow.setFont(u8g2_font_logisoso32_tf); // Large readable digits
+  char FFtt = FuelFlow[0];
+  char FFt = FuelFlow[1];
 
-      int width = u8g2_FuelFlow.getStrWidth(buffer);
-      u8g2_FuelFlow.drawStr((128 - width) / 2, 50, buffer);
+  short offset = short((FuelFlow[3] - '0') * FF_CHAR_H / 10);
 
-      u8g2_FuelFlow.sendBuffer();
-    
-    #endif
+  u8g2_FuelFlow.firstPage();
+  do {
+    u8g2_FuelFlow.setFont(ffFont);
+    u8g2_FuelFlow.setFontPosCenter();
+
+    // First two digits (no animation)
+    u8g2_FuelFlow.setCursor(FF_POS_X_1, FFI_SCREEN_H_MID);
+    u8g2_FuelFlow.print(FFtt);
+    u8g2_FuelFlow.setCursor(FF_POS_X_2, FFI_SCREEN_H_MID);
+    u8g2_FuelFlow.print(FFt);
+
+    // Animate hundreds
+    u8g2_FuelFlow.setCursor(FF_POS_X_3, FFI_SCREEN_H_MID + ((FF_CHAR_H + 1) * -2) + offset);
+    u8g2_FuelFlow.print(FFhTwoOver);
+    u8g2_FuelFlow.setCursor(FF_POS_X_3, FFI_SCREEN_H_MID + ((FF_CHAR_H + 1) * -1) + offset);
+    u8g2_FuelFlow.print(FFhNext);
+    u8g2_FuelFlow.setCursor(FF_POS_X_3, FFI_SCREEN_H_MID + offset);
+    u8g2_FuelFlow.print(FFh);
+    u8g2_FuelFlow.setCursor(FF_POS_X_3, FFI_SCREEN_H_MID + ((FF_CHAR_H + 1) * 1) + offset);
+    u8g2_FuelFlow.print(FFhPriv);
+
+    // Static trailing 00
+    u8g2_FuelFlow.setCursor(FF_POS_X_4, FFI_SCREEN_H_MID);
+    u8g2_FuelFlow.print('0');
+    u8g2_FuelFlow.setCursor(FF_POS_X_5, FFI_SCREEN_H_MID);
+    u8g2_FuelFlow.print('0');
+
+  } while (u8g2_FuelFlow.nextPage());
 }
 #endif
 
@@ -202,7 +252,8 @@ void loop()
 
     printDED();
     #ifdef FBAC_FF_1306
-    printFuelFlow();
+     setFuelFlowValue(bms.fuelFlow);
+     drawFF();
     #endif
     #ifdef FBAC_FASTLED
     updateCautionPanel();    
@@ -223,19 +274,25 @@ void loop()
           u8g2_DED.drawStr(0, 15, "NOT CONNECTED....");
         } while (u8g2_DED.nextPage());
       #ifdef FBAC_FF_1306
-      u8g2_FuelFlow.firstPage();
-      do {
-        u8g2_FuelFlow.drawStr(0, 15, "BMS NOT CONNECTED....");
-      } while (u8g2_FuelFlow.nextPage());
+       u8g2_FuelFlow.firstPage();
+        do {
+            u8g2_FuelFlow.setFont(ffFont); // Nice readable default font
+            u8g2_FuelFlow.setFontPosTop();
+            u8g2_FuelFlow.setCursor(15, 18);
+            u8g2_FuelFlow.print("00000");
+            
+        } while (u8g2_FuelFlow.nextPage());
       #endif
       #else
       u8g2_DED.clearBuffer();
       u8g2_DED.drawStr(0, 15, "Not Connected....");
       u8g2_DED.sendBuffer();
 #ifdef FBAC_FF_1306
-      u8g2_FuelFlow.setFont(u8g2_font_5x7_tr); 
+      u8g2_FuelFlow.setFont(ffFont); // Nice readable default font
       u8g2_FuelFlow.clearBuffer();
-      u8g2_FuelFlow.drawStr(0, 15, "BMS Not Connected....");
+      u8g2_FuelFlow.setFontPosTop();
+      u8g2_FuelFlow.setCursor(15, 18);
+      u8g2_FuelFlow.print("00000");
       u8g2_FuelFlow.sendBuffer();
       #endif
       #endif
