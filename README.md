@@ -36,7 +36,8 @@ This library is part of a larger ecosystem allowing home cockpit builders and si
 FalconBMSArduinoConnector bms;
 
 void setup() {
-  bms.begin(); //Starts the Serial Connection
+Serial.begin(114200);
+  bms.begin(Serial); //Starts the Serial Connection
 }
 
 void loop() {
