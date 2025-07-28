@@ -36,7 +36,7 @@ This library is part of a larger ecosystem allowing home cockpit builders and si
 FalconBMSArduinoConnector bms;
 
 void setup() {
-Serial.begin(114200);
+Serial.begin(115200);
   bms.begin(Serial); //Starts the Serial Connection
 }
 
@@ -57,8 +57,7 @@ if (bms.isConnected()) {
 ### Access DED Lines
 
 ```cpp
-bms.getDED();  // Request line 0
-Serial.println(bms.dedLines[0]);
+bms.getDED();  // Request DED
 ```
 
 ### LightBits Example
