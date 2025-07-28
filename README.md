@@ -4,6 +4,8 @@
 
 This library is part of a larger ecosystem allowing home cockpit builders and simulation enthusiasts to bring Falcon BMS data into real-world hardware like LEDs, displays, or gauges.
 
+## PC APP Release 
+The PC Companion App's Latest Release can be found here. [Latest Release](https://github.com/Bacon8tor/FalconBMSArduinoConnector/releases)
 ## Features
 
 * Serial communication with Falcon BMS via custom PC tool
