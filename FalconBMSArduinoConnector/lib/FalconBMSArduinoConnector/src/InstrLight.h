@@ -9,4 +9,15 @@ enum InstrLight : byte {
     INSTR_LIGHT_BRT = 2
 };
 
+enum FloodConsole : byte
+{
+    FLOOD_CONSOLE_OFF,
+    FLOOD_CONSOLE_1,
+    FLOOD_CONSOLE_2,
+    FLOOD_CONSOLE_3,
+    FLOOD_CONSOLE_4,
+    FLOOD_CONSOLE_5,
+    FLOOD_CONSOLE_6
+};
+
 #endif // INSTRLIGHT_H
