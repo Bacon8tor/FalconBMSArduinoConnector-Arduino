@@ -160,6 +160,14 @@ void FalconBMSArduinoConnector::getCMDSMode(){
       //   CmdsBYP = 5,
 }
 
+void FalconBMSArduinoConnector::getuhfPreset(){
+  sendCommand(0x28);
+}
+
+void FalconBMSArduinoConnector::getuhfFreq(){
+  sendCommand(0x29);
+}
+
 //Packet handling
 void FalconBMSArduinoConnector::sendCommand(uint8_t commandByte) {
   _serial->write(commandByte);
@@ -263,6 +271,13 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
     case 0x27:
       memcpy(&cmdsMode,data,sizeof(int));
     break;
+    case 0x28:
+      memcpy(&uhfPreset,data,sizeof(int));
+      
+    break;
+    case 0x29:
+      memcpy(&uhfFreq,data,sizeof(long));
+    break;
     case 0xA5: // Handshake byte?
       _serial->write(0x5A);
       connected = true;
@@ -273,6 +288,8 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
       break;
     }
   }
+  lastSerialActivity = millis();
+  connected = true;
 }
 
 void FalconBMSArduinoConnector::waitForPacket(){
