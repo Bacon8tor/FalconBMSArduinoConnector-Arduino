@@ -229,6 +229,40 @@ This library listens for incoming serial data in the Falcon BMS shared memory fo
 * Data Call: Make a data call like `bms.checkAllLights();` or `bms.getDED()` this is spilt up, to not call unneccessary data, call what you need. 
 * Ensure your PC-side application is sending compatible packets
 
+## All Configured Variables
+
+| Case | Description                       | Field Name              | Type                  |
+| ---- | --------------------------------- | ----------------------- | --------------------- |
+| 0x01 | LightBits                         | `lightBits`             | `uint32_t`            |
+| 0x02 | LightBits2                        | `lightBits2`            | `uint32_t`            |
+| 0x03 | LightBits3                        | `lightBits3`            | `uint32_t`            |
+| 0x04 | BlinkBits                         | `blinkBits`             | `uint32_t`            |
+| 0x05 | DED Lines (normalized)            | `DEDLines`, `Invert`    | `char[5][26]`, `bool` |
+| 0x06 | Fuel Flow                         | `fuelFlow`              | `float`               |
+| 0x07 | Instrument Light Level            | `instrLight`            | `uint8_t`             |
+| 0x08 | PFL Lines (normalized)            | `PFLLines`, `PFLInvert` | `char[5][26]`, `bool` |
+| 0x09 | Chaff Count                       | `ChaffCount`            | `float`               |
+| 0x10 | Flare Count                       | `FlareCount`            | `float`               |
+| 0x11 | Flood Console Brightness (unused) | *(hardcoded to 0x00)*   | `-`                   |
+| 0x12 | RPM                               | `rpm`                   | `float`               |
+| 0x13 | ECM Bits                          | `ecmBits[4]`            | `uint32_t[4]`         |
+| 0x14 | Oil Pressure 1                    | `oilPressure`           | `float`               |
+| 0x15 | Oil Pressure 2                    | `oilPressure2`          | `float`               |
+| 0x16 | Nozzle Position 1                 | `nozzlePos`             | `float`               |
+| 0x17 | Nozzle Position 2                 | `nozzlePos2`            | `float`               |
+| 0x18 | FTIT 1                            | `ftit`                  | `float`               |
+| 0x19 | FTIT 2                            | `ftit2`                 | `float`               |
+| 0x20 | Cabin Altitude                    | `cabinAlt`              | `float`               |
+| 0x21 | KIAS (Speed)                      | `kias`                  | `float`               |
+| 0x22 | Internal Fuel                     | `internalFuel`          | `float`               |
+| 0x23 | External Fuel                     | `externalFuel`          | `float`               |
+| 0x24 | EPU Fuel                          | `epuFuel`               | `float`               |
+| 0x25 | Hydraulic Pressure A              | `hydPressureA`          | `float`               |
+| 0x26 | Hydraulic Pressure B              | `hydPressureB`          | `float`               |
+| 0x27 | CMDS Mode                         | `cmdsMode`              | `int`                 |
+| 0x28 | UHF Preset                        | `BupUhfPreset`          | `int`                 |
+| 0x29 | UHF Frequency                     | `BupUhfFreq`            | `int` or `long`       |
+| 0x30 | Speed Brake                     | `speedBrake`            | `float`       |
 
 ## Credits
 
