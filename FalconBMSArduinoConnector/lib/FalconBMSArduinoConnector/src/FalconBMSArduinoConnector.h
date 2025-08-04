@@ -48,7 +48,8 @@ public:
   void getHYDPress();
   void getCMDSMode();
   void getInstrLight(); //Call 
-
+  void getuhfPreset();
+  void getuhfFreq();
   
 
   //DED
@@ -95,6 +96,11 @@ public:
 
   //CMDS Mode
   int cmdsMode;
+
+  // UHF Comms 
+  int uhfPreset;
+  long uhfFreq;
+
   
   //InstrLight Status
   int getInstrLightStatus(); //returns status 0 = off 1 = dim 2 = brt
@@ -231,7 +237,7 @@ Stream* _serial;
   bool isReading;
 
   bool connected;
-  const unsigned long timeoutMs = 5000;
+  const unsigned long timeoutMs = 3000;
 
   void handlePacket(uint8_t type, uint8_t* data, uint8_t len);
   

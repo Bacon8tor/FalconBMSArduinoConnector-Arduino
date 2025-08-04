@@ -20,11 +20,7 @@ void setup() {
 void loop() {
   bms.update();
   if (bms.isConnected()) {
-<<<<<<< Updated upstream
     bms.checkAllLights();
-=======
-    bms.checkAllLights():
->>>>>>> Stashed changes
     digitalWrite(ledPin, bms.isMasterCaution() ? HIGH : LOW); // CHECKS WHETHER isMasterCaution true or false then sets high or low 
     
   } else {
