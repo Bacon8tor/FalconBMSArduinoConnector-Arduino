@@ -276,9 +276,7 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
       
     break;
     case 0x29:
-    int num;
       memcpy(&uhfFreq,data,sizeof(long));
-      //uhfFreq = (long)num;
     break;
     case 0xA5: // Handshake byte?
       _serial->write(0x5A);

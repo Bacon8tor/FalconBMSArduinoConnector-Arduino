@@ -7,8 +7,8 @@ FalconBMSArduinoConnector bms;
 
 void setup() {
 
-  bms.begin();
-
+  Serial.begin(115200);
+  bms.begin(Serial);
 }
 
 
