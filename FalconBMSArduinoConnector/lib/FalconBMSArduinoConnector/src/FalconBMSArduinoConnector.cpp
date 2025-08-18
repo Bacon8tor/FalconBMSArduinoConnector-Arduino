@@ -75,36 +75,44 @@ void FalconBMSArduinoConnector::getblinkBits(){
   sendCommand(0x04);
 }
 
-void FalconBMSArduinoConnector::getPFL()
-{
-  sendCommand(0x08);
-}
+
 
 void FalconBMSArduinoConnector::getDED()
 {
   sendCommand(0x05);
 }
 
-void FalconBMSArduinoConnector::getChaffFlareCount() {
-  sendCommand(0x09);
-  sendCommand(0x10);
-}
-
 void FalconBMSArduinoConnector::getFuelFlow(){
   sendCommand(0x06);
 }
 
-void FalconBMSArduinoConnector::getECMBits(){
-    sendCommand(0x13);
+void FalconBMSArduinoConnector::getInstrLight(){
+  sendCommand(0x07);
+}
+void FalconBMSArduinoConnector::getPFL()
+{
+  sendCommand(0x08);
+}
+
+void FalconBMSArduinoConnector::getChaffFlareCount() {
+  sendCommand(0x09);
+  sendCommand(0x10);
+}
+void FalconBMSArduinoConnector::getFloodConsole(){
+  sendCommand(0x11);
+}
+
+void FalconBMSArduinoConnector::getRPM(){
+  sendCommand(0x12);
+}
+void FalconBMSArduinoConnector::getECMBits() {
+  sendCommand(0x13);
 }
 
 void FalconBMSArduinoConnector::getOilPressure(){
   sendCommand(0x14);
 }
 
-void FalconBMSArduinoConnector::getInstrLight(){
-  sendCommand(0x07);
-}
 void FalconBMSArduinoConnector::getOilPressure2(){
   sendCommand(0x15);
 }
@@ -168,6 +176,10 @@ void FalconBMSArduinoConnector::getuhfFreq(){
   sendCommand(0x29);
 }
 
+void FalconBMSArduinoConnector::getSpeedBrake(){
+  sendCommand(0x30);
+}
+
 //Packet handling
 void FalconBMSArduinoConnector::sendCommand(uint8_t commandByte) {
   _serial->write(commandByte);
@@ -216,6 +228,8 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
     break;
     case 0x11:
       //floodconsoleLights
+      memcpy(&floodConsole,data,len);
+      setFloodConsole();
     break;
     case 0x12:
       memcpy(&rpm,data,sizeof(float));
@@ -278,6 +292,9 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
     case 0x29:
       memcpy(&uhfFreq,data,sizeof(long));
     break;
+    case 0x30:
+      memcpy(&speedBrake,data,sizeof(float));
+    break;
     case 0xA5: // Handshake byte?
       _serial->write(0x5A);
       connected = true;
@@ -328,9 +345,10 @@ void FalconBMSArduinoConnector::waitForPacket(){
             lastSerialActivity = millis();
             
           } else {
-          
+              sendCommand(0x99);
+              return;
           }
-
+            sendCommand(0x99);
           return;
         }
       }
@@ -384,11 +402,49 @@ void FalconBMSArduinoConnector::setInstrLights(){
   }else {
     instrLightStatus = 0;
   }
+  InstrumentLighting = instrLightStatus;
 }
 
 int FalconBMSArduinoConnector::getInstrLightStatus(){
   return instrLightStatus;
 }
+
+void FalconBMSArduinoConnector::setFloodConsole(){
+  // if(floodConsole == FLOOD_CONSOLE_OFF){
+  //   floodConsoleStatus = 0;
+  // } 
+  switch (floodConsole){
+        case FLOOD_CONSOLE_OFF:
+          floodConsoleStatus =0;
+        break;
+        case FLOOD_CONSOLE_1:
+          floodConsoleStatus =1;
+        break;
+        case FLOOD_CONSOLE_2:
+          floodConsoleStatus =2;
+        break;
+        case FLOOD_CONSOLE_3:
+          floodConsoleStatus =3;
+        break;
+        case FLOOD_CONSOLE_4:
+          floodConsoleStatus =4;
+        break;
+        case FLOOD_CONSOLE_5:
+          floodConsoleStatus =5;
+        break;
+        case FLOOD_CONSOLE_6:
+          floodConsoleStatus =6;
+        break;
+        default:
+        floodConsoleStatus =0;
+  }
+  FloodConsoleLighting = floodConsoleStatus;
+}
+
+int FalconBMSArduinoConnector::getFloodConsoleStatus(){
+  return floodConsoleStatus;
+}
+
 void FalconBMSArduinoConnector::decodePFL(uint8_t* data, uint8_t len) {
   if (len < 120) return; // Must be 5 lines x 24 chars
 

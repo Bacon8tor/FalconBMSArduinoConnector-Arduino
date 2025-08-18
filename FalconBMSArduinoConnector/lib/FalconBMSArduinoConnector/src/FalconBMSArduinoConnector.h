@@ -50,7 +50,9 @@ public:
   void getInstrLight(); //Call 
   void getuhfPreset();
   void getuhfFreq();
-  
+  void getSpeedBrake();
+  void getRPM();
+  void getFloodConsole();
 
   //DED
   char dedLines[5][27];
@@ -104,7 +106,14 @@ public:
   
   //InstrLight Status
   int getInstrLightStatus(); //returns status 0 = off 1 = dim 2 = brt
+  int InstrumentLighting;
   
+  //Flood Console Status 
+  int getFloodConsoleStatus();
+  int FloodConsoleLighting;
+  
+  //Speed Brake 
+  float speedBrake;
 
   // Light bit getters
   bool isMasterCaution();
@@ -231,6 +240,8 @@ Stream* _serial;
   uint32_t blinkBits;
   byte instrLight;
   int instrLightStatus;
+  byte floodConsole;
+  int floodConsoleStatus;
   
   uint8_t buffer[134];
   uint8_t idx;
@@ -246,6 +257,7 @@ Stream* _serial;
   void checkLightBits3();
   void checkBlinkBits();
   void setInstrLights();
+  void setFloodConsole();
   void sendCommand(uint8_t commandByte);
   void waitForPacket();
   void decodeDED(uint8_t* data, uint8_t len);
