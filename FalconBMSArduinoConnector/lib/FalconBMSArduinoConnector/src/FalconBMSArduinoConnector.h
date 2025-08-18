@@ -51,6 +51,8 @@ public:
   void getuhfPreset();
   void getuhfFreq();
   void getSpeedBrake();
+  void getRPM();
+  void getFloodConsole();
 
   //DED
   char dedLines[5][27];
@@ -105,6 +107,7 @@ public:
   //InstrLight Status
   int getInstrLightStatus(); //returns status 0 = off 1 = dim 2 = brt
   int InstrumentLighting;
+  
   //Flood Console Status 
   int getFloodConsoleStatus();
   int FloodConsoleLighting;

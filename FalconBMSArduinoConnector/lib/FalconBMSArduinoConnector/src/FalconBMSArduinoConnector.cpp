@@ -75,36 +75,44 @@ void FalconBMSArduinoConnector::getblinkBits(){
   sendCommand(0x04);
 }
 
-void FalconBMSArduinoConnector::getPFL()
-{
-  sendCommand(0x08);
-}
+
 
 void FalconBMSArduinoConnector::getDED()
 {
   sendCommand(0x05);
 }
 
-void FalconBMSArduinoConnector::getChaffFlareCount() {
-  sendCommand(0x09);
-  sendCommand(0x10);
-}
-
 void FalconBMSArduinoConnector::getFuelFlow(){
   sendCommand(0x06);
 }
 
-void FalconBMSArduinoConnector::getECMBits(){
-    sendCommand(0x13);
+void FalconBMSArduinoConnector::getInstrLight(){
+  sendCommand(0x07);
+}
+void FalconBMSArduinoConnector::getPFL()
+{
+  sendCommand(0x08);
+}
+
+void FalconBMSArduinoConnector::getChaffFlareCount() {
+  sendCommand(0x09);
+  sendCommand(0x10);
+}
+void FalconBMSArduinoConnector::getFloodConsole(){
+  sendCommand(0x11);
+}
+
+void FalconBMSArduinoConnector::getRPM(){
+  sendCommand(0x12);
+}
+void FalconBMSArduinoConnector::getECMBits() {
+  sendCommand(0x13);
 }
 
 void FalconBMSArduinoConnector::getOilPressure(){
   sendCommand(0x14);
 }
 
-void FalconBMSArduinoConnector::getInstrLight(){
-  sendCommand(0x07);
-}
 void FalconBMSArduinoConnector::getOilPressure2(){
   sendCommand(0x15);
 }
