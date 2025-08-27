@@ -53,6 +53,10 @@ public:
   void getSpeedBrake();
   void getRPM();
   void getFloodConsole();
+  void getIFFMode1Digit1();
+  void getIFFMode1Digit2();
+  void getIFFMode3Digit1();
+  void getIFFMode3Digit2();
 
   //DED
   char dedLines[5][27];
@@ -114,6 +118,12 @@ public:
   
   //Speed Brake 
   float speedBrake;
+
+  //IFF Mode Digits
+  int IFFMode1Digit1;
+  int IFFMode1Digit2;
+  int IFFMode3Digit1;
+  int IFFMode3Digit2;
 
   // Light bit getters
   bool isMasterCaution();
@@ -243,6 +253,11 @@ Stream* _serial;
   byte floodConsole;
   int floodConsoleStatus;
   
+  byte IFFMode1Digit1_byte;
+  byte IFFMode1Digit2_byte;
+  byte IFFMode3Digit1_byte;
+  byte IFFMode3Digit2_byte;
+
   uint8_t buffer[134];
   uint8_t idx;
   bool isReading;

@@ -75,8 +75,6 @@ void FalconBMSArduinoConnector::getblinkBits(){
   sendCommand(0x04);
 }
 
-
-
 void FalconBMSArduinoConnector::getDED()
 {
   sendCommand(0x05);
@@ -178,6 +176,19 @@ void FalconBMSArduinoConnector::getuhfFreq(){
 
 void FalconBMSArduinoConnector::getSpeedBrake(){
   sendCommand(0x30);
+}
+
+void FalconBMSArduinoConnector::getIFFMode1Digit1(){
+  sendCommand(0x31);
+}
+void FalconBMSArduinoConnector::getIFFMode1Digit2(){
+  sendCommand(0x32);
+}
+void FalconBMSArduinoConnector::getIFFMode3Digit1(){
+  sendCommand(0x33);
+}
+void FalconBMSArduinoConnector::getIFFMode3Digit2(){
+  sendCommand(0x34);
 }
 
 //Packet handling
@@ -295,6 +306,22 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
     case 0x30:
       memcpy(&speedBrake,data,sizeof(float));
     break;
+    case 0x31:
+       memcpy(&IFFMode1Digit1_byte,data,sizeof(byte));
+        IFFMode1Digit1 = (int)IFFMode1Digit1_byte;
+    break;
+    case 0x32:
+       memcpy(&IFFMode1Digit2_byte,data,sizeof(byte));
+        IFFMode1Digit2 = (int)IFFMode1Digit2_byte;
+    break;
+    case 0x33:
+       memcpy(&IFFMode3Digit1_byte,data,sizeof(byte));
+        IFFMode3Digit1 = (int)IFFMode3Digit1_byte;
+    break;
+    case 0x34:
+       memcpy(&IFFMode3Digit2_byte,data,sizeof(byte));
+        IFFMode3Digit2 = (int)IFFMode3Digit2_byte;
+    break;
     case 0xA5: // Handshake byte?
       _serial->write(0x5A);
       connected = true;
@@ -343,9 +370,10 @@ void FalconBMSArduinoConnector::waitForPacket(){
           if ((sum & 0xFF) == checksum) {
             handlePacket(type, data, len);
             lastSerialActivity = millis();
-            
+            return;
           } else {
               sendCommand(0x99);
+              connected = false;
               return;
           }
             sendCommand(0x99);
@@ -464,6 +492,7 @@ void FalconBMSArduinoConnector::decodeDED(uint8_t* data, uint8_t len) {
   }
 
 }
+
 
 void FalconBMSArduinoConnector::checkAllLights(){
     getLightBits(1);
@@ -598,6 +627,7 @@ void FalconBMSArduinoConnector::checkBlinkBits() {
   _blinkBits[11] = blinkBits & B_JFSOn_Fast;
   _blinkBits[12] = blinkBits & B_ECM_Oper;
 }
+
 
 // Individual accessors
 #define DEFINE_GETTER(name, index) bool FalconBMSArduinoConnector::name() { return _bits[index]; }
