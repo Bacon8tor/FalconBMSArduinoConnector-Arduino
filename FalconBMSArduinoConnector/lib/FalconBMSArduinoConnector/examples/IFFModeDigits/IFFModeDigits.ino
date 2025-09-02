@@ -1,5 +1,4 @@
 #include <FalconBMSArduinoConnector.h>
-
 FalconBMSArduinoConnector bms;
 
 

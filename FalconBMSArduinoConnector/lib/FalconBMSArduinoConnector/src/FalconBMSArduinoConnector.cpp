@@ -191,6 +191,31 @@ void FalconBMSArduinoConnector::getIFFMode3Digit2(){
   sendCommand(0x34);
 }
 
+void FalconBMSArduinoConnector::getfwd(){
+  sendCommand(0x35);
+}
+
+void FalconBMSArduinoConnector::getaft(){
+  sendCommand(0x36);
+}
+
+void FalconBMSArduinoConnector::gettotalFuel(){
+  sendCommand(0x37);
+}
+
+void FalconBMSArduinoConnector::getdesiredCourse(){
+  sendCommand(0x38);
+}
+void FalconBMSArduinoConnector::getcourseDeviation(){
+  sendCommand(0x39);
+}
+
+void FalconBMSArduinoConnector::getdistanceToBeacon(){
+sendCommand(0x40);
+}
+void FalconBMSArduinoConnector::getbearingToBeacon(){
+sendCommand(0x41);
+}
 //Packet handling
 void FalconBMSArduinoConnector::sendCommand(uint8_t commandByte) {
   _serial->write(commandByte);
@@ -321,6 +346,27 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
     case 0x34:
        memcpy(&IFFMode3Digit2_byte,data,sizeof(byte));
         IFFMode3Digit2 = (int)IFFMode3Digit2_byte;
+    break;
+    case 0x35:
+      memccpy(&fwd,data,sizeof(float),sizeof(float));
+    break;
+    case 0x36:
+      memccpy(&aft,data,sizeof(float),sizeof(float));
+    break;
+    case 0x37:
+      memccpy(&totalFuel,data,sizeof(float),sizeof(float));
+    break;
+    case 0x38:
+      memccpy(&desiredCourse,data,sizeof(float),sizeof(float));
+    break;
+    case 0x39:
+      memccpy(&courseDeviation,data,sizeof(float),sizeof(float));
+    break;
+    case 0x40:
+      memccpy(&distanceToBearing,data,sizeof(float),sizeof(float));
+    break;
+    case 0x41:
+      memccpy(&bearingToBearing,data,sizeof(float),sizeof(float));
     break;
     case 0xA5: // Handshake byte?
       _serial->write(0x5A);

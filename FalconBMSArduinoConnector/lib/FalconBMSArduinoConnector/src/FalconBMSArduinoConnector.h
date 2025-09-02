@@ -57,6 +57,13 @@ public:
   void getIFFMode1Digit2();
   void getIFFMode3Digit1();
   void getIFFMode3Digit2();
+  void getfwd();
+  void getaft();
+  void gettotalFuel();
+  void getdesiredCourse();
+  void getcourseDeviation();
+  void getdistanceToBeacon();
+  void getbearingToBeacon();
 
   //DED
   char dedLines[5][27];
@@ -67,11 +74,19 @@ public:
   float internalFuel;
   float externalFuel;
   float epuFuel;  
-
+  float fwd;
+  float aft;
+  float totalFuel;
   //Chaff/Flare
   float chaffCount;
   float flareCount;
 
+  //Course/Heading 
+  float desiredCourse;
+  float courseDeviation;
+  float distanceToBearing;
+  float bearingToBearing;
+  
   //RPM 
   float rpm;
 
