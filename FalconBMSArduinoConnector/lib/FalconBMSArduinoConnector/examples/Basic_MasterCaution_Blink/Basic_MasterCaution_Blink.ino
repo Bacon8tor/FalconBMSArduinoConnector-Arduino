@@ -1,3 +1,13 @@
+#include <BlinkBits.h>
+#include <EcmBits.h>
+#include <FBAC_Config.h>
+#include <FalconBMSArduinoConnector.h>
+#include <InstrLight.h>
+#include <LightBits.h>
+#include <LightBits2.h>
+#include <LightBits3.h>
+#include <falconded_font.h>
+
 #include <FalconBMSArduinoConnector.h>
 
 FalconBMSArduinoConnector bms;

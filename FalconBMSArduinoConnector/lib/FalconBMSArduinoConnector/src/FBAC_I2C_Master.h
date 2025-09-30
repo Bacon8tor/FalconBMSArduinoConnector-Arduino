@@ -69,6 +69,64 @@ enum I2C_Commands : uint8_t {
   // CMDS
   I2C_CMD_CMDS_MODE = 0x27,
 
+  // Motion derivatives
+  I2C_CMD_X_DOT = 0x42,
+  I2C_CMD_Y_DOT = 0x43,
+  I2C_CMD_Z_DOT = 0x44,
+
+  // Flight angles
+  I2C_CMD_ALPHA = 0x48,
+  I2C_CMD_BETA = 0x49,
+  I2C_CMD_GAMMA = 0x4A,
+
+  // Speed parameters
+  I2C_CMD_MACH = 0x4B,
+  I2C_CMD_VT = 0x4C,
+  I2C_CMD_GS = 0x4D,
+  I2C_CMD_WIND_OFFSET = 0x4E,
+
+  // Gear positions
+  I2C_CMD_NOSE_GEAR_POS = 0x4F,
+  I2C_CMD_LEFT_GEAR_POS = 0x50,
+  I2C_CMD_RIGHT_GEAR_POS = 0x51,
+  I2C_CMD_GEAR_POS = 0x52,
+
+  // Engine 2 data
+  I2C_CMD_RPM2 = 0x60,
+  I2C_CMD_FTIT = 0x61,
+  I2C_CMD_OIL_PRESSURE = 0x62,
+  I2C_CMD_FUEL_FLOW2 = 0x63,
+  I2C_CMD_NOZZLE_POS = 0x66,
+
+  // Trim
+  I2C_CMD_TRIM_PITCH = 0x70,
+  I2C_CMD_TRIM_ROLL = 0x71,
+  I2C_CMD_TRIM_YAW = 0x72,
+
+  // Heading
+  I2C_CMD_CURRENT_HEADING = 0x93,
+  I2C_CMD_DESIRED_HEADING = 0x94,
+
+  // Altitude & Navigation
+  I2C_CMD_ALT_CAL_READING = 0xB4,
+  I2C_CMD_BINGO_FUEL = 0xB6,
+  I2C_CMD_CARA_ALOW = 0xB7,
+  I2C_CMD_BULLSEYE_X = 0xB8,
+  I2C_CMD_BULLSEYE_Y = 0xB9,
+
+  // Control surfaces
+  I2C_CMD_TURN_RATE = 0xC0,
+  I2C_CMD_LEF_POS = 0xC1,
+  I2C_CMD_TEF_POS = 0xC2,
+  I2C_CMD_VTOL_POS = 0xC3,
+
+  // Position & Orientation
+  I2C_CMD_LATITUDE = 0xD1,
+  I2C_CMD_LONGITUDE = 0xD2,
+  I2C_CMD_MAG_DEVIATION_SYSTEM = 0xD3,
+  I2C_CMD_MAG_DEVIATION_REAL = 0xD4,
+  I2C_CMD_BUMP_INTENSITY = 0xD5,
+
   // Status commands
   I2C_CMD_CONNECTION_STATUS = 0x80,
   I2C_CMD_ALL_LIGHTS = 0x81,

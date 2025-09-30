@@ -53,6 +53,44 @@ public:
   void getSpeedBrake();
   void getRPM();
   void getFloodConsole();
+  void getXDot();
+  void getYDot();
+  void getZDot();
+  void getAlpha();
+  void getBeta();
+  void getGamma();
+  void getMach();
+  void getVt();
+  void getGs();
+  void getWindOffset();
+  void getNoseGearPos();
+  void getLeftGearPos();
+  void getRightGearPos();
+  void getGearPos();
+  void getRPM2();
+  void getFTIT();
+  void getOilPressure();
+  void getFuelFlow2();
+  void getNozzlePos();
+  void getTrimPitch();
+  void getTrimRoll();
+  void getTrimYaw();
+  void getCurrentHeading();
+  void getDesiredHeading();
+  void getAltCalReading();
+  void getBingoFuel();
+  void getCaraAlow();
+  void getBullseyeX();
+  void getBullseyeY();
+  void getTurnRate();
+  void getLefPos();
+  void getTefPos();
+  void getVtolPos();
+  void getLatitude();
+  void getLongitude();
+  void getMagDeviationSystem();
+  void getMagDeviationReal();
+  void getBumpIntensity();
 
   //DED
   char dedLines[5][27];
@@ -112,8 +150,64 @@ public:
   int getFloodConsoleStatus();
   int FloodConsoleLighting;
   
-  //Speed Brake 
+  //Speed Brake
   float speedBrake;
+
+  //Motion
+  float xDot;
+  float yDot;
+  float zDot;
+
+  //Flight Parameters
+  float alpha;
+  float beta;
+  float gamma;
+  float mach;
+  float vt;
+  float gs;
+  float windOffset;
+
+  //Gear Positions
+  float noseGearPos;
+  float leftGearPos;
+  float rightGearPos;
+  float gearPos;
+
+  //Engine 2
+  float rpm2;
+  float ftit;
+  float oilPressure;
+  float fuelFlow2;
+  float nozzlePos;
+
+  //Trim
+  float trimPitch;
+  float trimRoll;
+  float trimYaw;
+
+  //Heading
+  float currentHeading;
+  float desiredHeading;
+
+  //Altitude & Navigation
+  float altCalReading;
+  int bingoFuel;
+  float caraAlow;
+  float bullseyeX;
+  float bullseyeY;
+
+  //Flight Control Surfaces
+  float turnRate;
+  float lefPos;
+  float tefPos;
+  float vtolPos;
+
+  //Position & Orientation
+  float latitude;
+  float longitude;
+  float magDeviationSystem;
+  float magDeviationReal;
+  float bumpIntensity;
 
   // Light bit getters
   bool isMasterCaution();

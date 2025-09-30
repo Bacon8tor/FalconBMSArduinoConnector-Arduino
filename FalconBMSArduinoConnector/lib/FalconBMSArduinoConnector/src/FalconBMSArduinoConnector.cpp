@@ -180,6 +180,158 @@ void FalconBMSArduinoConnector::getSpeedBrake(){
   sendCommand(0x30);
 }
 
+void FalconBMSArduinoConnector::getXDot(){
+  sendCommand(0x42);
+}
+
+void FalconBMSArduinoConnector::getYDot(){
+  sendCommand(0x43);
+}
+
+void FalconBMSArduinoConnector::getZDot(){
+  sendCommand(0x44);
+}
+
+void FalconBMSArduinoConnector::getAlpha(){
+  sendCommand(0x48);
+}
+
+void FalconBMSArduinoConnector::getBeta(){
+  sendCommand(0x49);
+}
+
+void FalconBMSArduinoConnector::getGamma(){
+  sendCommand(0x4A);
+}
+
+void FalconBMSArduinoConnector::getMach(){
+  sendCommand(0x4B);
+}
+
+void FalconBMSArduinoConnector::getVt(){
+  sendCommand(0x4C);
+}
+
+void FalconBMSArduinoConnector::getGs(){
+  sendCommand(0x4D);
+}
+
+void FalconBMSArduinoConnector::getWindOffset(){
+  sendCommand(0x4E);
+}
+
+void FalconBMSArduinoConnector::getNoseGearPos(){
+  sendCommand(0x4F);
+}
+
+void FalconBMSArduinoConnector::getLeftGearPos(){
+  sendCommand(0x50);
+}
+
+void FalconBMSArduinoConnector::getRightGearPos(){
+  sendCommand(0x51);
+}
+
+void FalconBMSArduinoConnector::getGearPos(){
+  sendCommand(0x52);
+}
+
+void FalconBMSArduinoConnector::getRPM2(){
+  sendCommand(0x60);
+}
+
+void FalconBMSArduinoConnector::getFTIT(){
+  sendCommand(0x61);
+}
+
+void FalconBMSArduinoConnector::getOilPressure(){
+  sendCommand(0x62);
+}
+
+void FalconBMSArduinoConnector::getFuelFlow2(){
+  sendCommand(0x63);
+}
+
+void FalconBMSArduinoConnector::getNozzlePos(){
+  sendCommand(0x66);
+}
+
+void FalconBMSArduinoConnector::getTrimPitch(){
+  sendCommand(0x70);
+}
+
+void FalconBMSArduinoConnector::getTrimRoll(){
+  sendCommand(0x71);
+}
+
+void FalconBMSArduinoConnector::getTrimYaw(){
+  sendCommand(0x72);
+}
+
+void FalconBMSArduinoConnector::getCurrentHeading(){
+  sendCommand(0x93);
+}
+
+void FalconBMSArduinoConnector::getDesiredHeading(){
+  sendCommand(0x94);
+}
+
+void FalconBMSArduinoConnector::getAltCalReading(){
+  sendCommand(0xB4);
+}
+
+void FalconBMSArduinoConnector::getBingoFuel(){
+  sendCommand(0xB6);
+}
+
+void FalconBMSArduinoConnector::getCaraAlow(){
+  sendCommand(0xB7);
+}
+
+void FalconBMSArduinoConnector::getBullseyeX(){
+  sendCommand(0xB8);
+}
+
+void FalconBMSArduinoConnector::getBullseyeY(){
+  sendCommand(0xB9);
+}
+
+void FalconBMSArduinoConnector::getTurnRate(){
+  sendCommand(0xC0);
+}
+
+void FalconBMSArduinoConnector::getLefPos(){
+  sendCommand(0xC1);
+}
+
+void FalconBMSArduinoConnector::getTefPos(){
+  sendCommand(0xC2);
+}
+
+void FalconBMSArduinoConnector::getVtolPos(){
+  sendCommand(0xC3);
+}
+
+void FalconBMSArduinoConnector::getLatitude(){
+  sendCommand(0xD1);
+}
+
+void FalconBMSArduinoConnector::getLongitude(){
+  sendCommand(0xD2);
+}
+
+void FalconBMSArduinoConnector::getMagDeviationSystem(){
+  sendCommand(0xD3);
+}
+
+void FalconBMSArduinoConnector::getMagDeviationReal(){
+  sendCommand(0xD4);
+}
+
+void FalconBMSArduinoConnector::getBumpIntensity(){
+  sendCommand(0xD5);
+}
+
 //Packet handling
 void FalconBMSArduinoConnector::sendCommand(uint8_t commandByte) {
   _serial->write(commandByte);
@@ -295,10 +447,124 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
     case 0x30:
       memcpy(&speedBrake,data,sizeof(float));
     break;
+    case 0x42:
+      memcpy(&xDot,data,sizeof(float));
+    break;
+    case 0x43:
+      memcpy(&yDot,data,sizeof(float));
+    break;
+    case 0x44:
+      memcpy(&zDot,data,sizeof(float));
+    break;
+    case 0x48:
+      memcpy(&alpha,data,sizeof(float));
+    break;
+    case 0x49:
+      memcpy(&beta,data,sizeof(float));
+    break;
+    case 0x4A:
+      memcpy(&gamma,data,sizeof(float));
+    break;
+    case 0x4B:
+      memcpy(&mach,data,sizeof(float));
+    break;
+    case 0x4C:
+      memcpy(&vt,data,sizeof(float));
+    break;
+    case 0x4D:
+      memcpy(&gs,data,sizeof(float));
+    break;
+    case 0x4E:
+      memcpy(&windOffset,data,sizeof(float));
+    break;
+    case 0x4F:
+      memcpy(&noseGearPos,data,sizeof(float));
+    break;
+    case 0x50:
+      memcpy(&leftGearPos,data,sizeof(float));
+    break;
+    case 0x51:
+      memcpy(&rightGearPos,data,sizeof(float));
+    break;
+    case 0x52:
+      memcpy(&gearPos,data,sizeof(float));
+    break;
+    case 0x60:
+      memcpy(&rpm2,data,sizeof(float));
+    break;
+    case 0x61:
+      memcpy(&ftit,data,sizeof(float));
+    break;
+    case 0x62:
+      memcpy(&oilPressure,data,sizeof(float));
+    break;
+    case 0x63:
+      memcpy(&fuelFlow2,data,sizeof(float));
+    break;
+    case 0x66:
+      memcpy(&nozzlePos,data,sizeof(float));
+    break;
+    case 0x70:
+      memcpy(&trimPitch,data,sizeof(float));
+    break;
+    case 0x71:
+      memcpy(&trimRoll,data,sizeof(float));
+    break;
+    case 0x72:
+      memcpy(&trimYaw,data,sizeof(float));
+    break;
+    case 0x93:
+      memcpy(&currentHeading,data,sizeof(float));
+    break;
+    case 0x94:
+      memcpy(&desiredHeading,data,sizeof(float));
+    break;
+    case 0xB4:
+      memcpy(&altCalReading,data,sizeof(float));
+    break;
+    case 0xB6:
+      memcpy(&bingoFuel,data,sizeof(int));
+    break;
+    case 0xB7:
+      memcpy(&caraAlow,data,sizeof(float));
+    break;
+    case 0xB8:
+      memcpy(&bullseyeX,data,sizeof(float));
+    break;
+    case 0xB9:
+      memcpy(&bullseyeY,data,sizeof(float));
+    break;
+    case 0xC0:
+      memcpy(&turnRate,data,sizeof(float));
+    break;
+    case 0xC1:
+      memcpy(&lefPos,data,sizeof(float));
+    break;
+    case 0xC2:
+      memcpy(&tefPos,data,sizeof(float));
+    break;
+    case 0xC3:
+      memcpy(&vtolPos,data,sizeof(float));
+    break;
+    case 0xD1:
+      memcpy(&latitude,data,sizeof(float));
+    break;
+    case 0xD2:
+      memcpy(&longitude,data,sizeof(float));
+    break;
+    case 0xD3:
+      memcpy(&magDeviationSystem,data,sizeof(float));
+    break;
+    case 0xD4:
+      memcpy(&magDeviationReal,data,sizeof(float));
+    break;
+    case 0xD5:
+      memcpy(&bumpIntensity,data,sizeof(float));
+    break;
     case 0xA5: // Handshake byte?
       _serial->write(0x5A);
       connected = true;
-      lastSerialActivity = millis(); 
+      lastSerialActivity = millis();
       break;
     default: {
       _serial->write(0x5A);
