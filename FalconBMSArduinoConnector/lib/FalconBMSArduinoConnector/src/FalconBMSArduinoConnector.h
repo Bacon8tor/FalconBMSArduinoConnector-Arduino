@@ -8,11 +8,11 @@
 #include "BlinkBits.h"
 #include "EcmBits.h"
 #include "InstrLight.h"
+#include "SimStatusBits.h"
 #include "FBAC_Config.h"
 
-
-
-class FalconBMSArduinoConnector {
+class FalconBMSArduinoConnector
+{
 
 public:
   FalconBMSArduinoConnector();
@@ -20,11 +20,11 @@ public:
   // Connection status
   bool isConnected();
   unsigned long lastSerialActivity;
-  
-  void begin(Stream& serial = Serial, uint32_t baud = 115200);
-  //void begin(HardwareSerial& serial = Serial, uint32_t baud = 115200);
-  
-  void update();  // Call in loop()
+
+  void begin(Stream &serial = Serial, uint32_t baud = 115200);
+  // void begin(HardwareSerial& serial = Serial, uint32_t baud = 115200);
+
+  void update(); // Call in loop()
   void checkAllLights();
   void getLightBits(int lb);
   void getblinkBits();
@@ -47,7 +47,7 @@ public:
   void getEPUFuel();
   void getHYDPress();
   void getCMDSMode();
-  void getInstrLight(); //Call 
+  void getInstrLight(); // Call
   void getuhfPreset();
   void getuhfFreq();
   void getSpeedBrake();
@@ -64,81 +64,84 @@ public:
   void getcourseDeviation();
   void getdistanceToBeacon();
   void getbearingToBeacon();
+  void getSimStatus();
 
-  //DED
+  // DED
   char dedLines[5][27];
   char pflLines[5][27];
-  
-  //Fuel
+
+  // Fuel
   float fuelFlow;
   float internalFuel;
   float externalFuel;
-  float epuFuel;  
+  float epuFuel;
   float fwd;
   float aft;
   float totalFuel;
-  //Chaff/Flare
+  // Chaff/Flare
   float chaffCount;
   float flareCount;
 
-  //Course/Heading 
+  // Course/Heading
   float desiredCourse;
   float courseDeviation;
   float distanceToBearing;
   float bearingToBearing;
-  
-  //RPM 
+
+  // RPM
   float rpm;
 
-  //ECM
+  // ECM
   uint32_t ecm[4];
 
-  //Oil Press
+  // Oil Press
   float oilPress;
   float oilPress2;
 
-  //Nozzle Pos
+  // Nozzle Pos
   float nozzlePos;
   float nozzlePos2;
 
-  //FTIT
+  // FTIT
   float ftit;
   float ftit2;
 
-  //Cabin Alt 
+  // Cabin Alt
   float cabinAlt;
 
-  //Airspeed 
+  // Airspeed
   float kias;
 
-  //HYD Press
+  // HYD Press
   float hydPressA;
   float hydPressB;
 
-  //CMDS Mode
+  // CMDS Mode
   int cmdsMode;
 
-  // UHF Comms 
+  // UHF Comms
   int uhfPreset;
   long uhfFreq;
 
-  
-  //InstrLight Status
-  int getInstrLightStatus(); //returns status 0 = off 1 = dim 2 = brt
+  // InstrLight Status
+  int getInstrLightStatus(); // returns status 0 = off 1 = dim 2 = brt
   int InstrumentLighting;
-  
-  //Flood Console Status 
+
+  // Flood Console Status
   int getFloodConsoleStatus();
   int FloodConsoleLighting;
-  
-  //Speed Brake 
+
+  // Speed Brake
   float speedBrake;
 
-  //IFF Mode Digits
+  // IFF Mode Digits
   int IFFMode1Digit1;
   int IFFMode1Digit2;
   int IFFMode3Digit1;
   int IFFMode3Digit2;
+
+  // Sim status, e.g., whether the simulation is in 3D.
+  uint32_t simStatus;
 
   // Light bit getters
   bool isMasterCaution();
@@ -173,8 +176,8 @@ public:
   bool isCabinPress();
   bool isAutoPilotOn();
   bool isTFRSTBY();
-  bool isAllLampBitsOn(); //Not Sure if these are working 
-  bool isAllLampBits; //trying to check ALl LampBits
+  bool isAllLampBitsOn(); // Not Sure if these are working
+  bool isAllLampBits;     // trying to check ALl LampBits
 
   // LightBits2-related getters
   bool isHandOff();
@@ -256,9 +259,12 @@ public:
   bool isJFSOnFastBlinking();
   bool isECMOperBlinking();
 
+  // Sim status getter
+  bool isIn3D();
+
 private:
-Stream* _serial;
-//  HardwareSerial* _serial;
+  Stream *_serial;
+  //  HardwareSerial* _serial;
   uint32_t lightBits;
   uint32_t lightBits2;
   uint32_t lightBits3;
@@ -267,7 +273,7 @@ Stream* _serial;
   int instrLightStatus;
   byte floodConsole;
   int floodConsoleStatus;
-  
+
   byte IFFMode1Digit1_byte;
   byte IFFMode1Digit2_byte;
   byte IFFMode3Digit1_byte;
@@ -280,8 +286,8 @@ Stream* _serial;
   bool connected;
   const unsigned long timeoutMs = 3000;
 
-  void handlePacket(uint8_t type, uint8_t* data, uint8_t len);
-  
+  void handlePacket(uint8_t type, uint8_t *data, uint8_t len);
+
   void checkLightBits();
   void checkLightBits2();
   void checkLightBits3();
@@ -290,10 +296,8 @@ Stream* _serial;
   void setFloodConsole();
   void sendCommand(uint8_t commandByte);
   void waitForPacket();
-  void decodeDED(uint8_t* data, uint8_t len);
-  void decodePFL(uint8_t* data, uint8_t len);
-
-  
+  void decodeDED(uint8_t *data, uint8_t len);
+  void decodePFL(uint8_t *data, uint8_t len);
 
   // Bit flags
   bool _bits[32];
@@ -301,7 +305,5 @@ Stream* _serial;
   bool _bits3[32];
   bool _blinkBits[13];
 };
-
-
 
 #endif
