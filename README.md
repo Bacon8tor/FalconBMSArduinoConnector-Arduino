@@ -219,6 +219,11 @@ float kias;
 float hydPressA;
 float hydPressB;
 ```
+### In3d
+
+```cpp
+bool isIn3D();
+```
 
 ## How It Works
 
@@ -263,6 +268,7 @@ This library listens for incoming serial data in the Falcon BMS shared memory fo
 | 0x28 | UHF Preset                        | `BupUhfPreset`          | `int`                 |
 | 0x29 | UHF Frequency                     | `BupUhfFreq`            | `int` or `long`       |
 | 0x30 | Speed Brake                     | `speedBrake`            | `float`       |
+| 0x42 | In3d                             | `in3d`                 | `bool`        |
 
 ## Credits
 
