@@ -2,21 +2,22 @@
 #include <Arduino.h>
 
 FalconBMSArduinoConnector::FalconBMSArduinoConnector()
-  : lastSerialActivity(0),
-    _serial(&Serial),
-    lightBits(0),
-    lightBits2(0),
-    lightBits3(0),
-    blinkBits(0),
-    instrLight(0),
-    idx(0),
-    isReading(false),
-    connected(false)
+    : lastSerialActivity(0),
+      _serial(&Serial),
+      lightBits(0),
+      lightBits2(0),
+      lightBits3(0),
+      blinkBits(0),
+      instrLight(0),
+      idx(0),
+      isReading(false),
+      connected(false)
 {
   memset(_bits, 0, sizeof(_bits));
 }
 
-void FalconBMSArduinoConnector::begin(Stream& serial, uint32_t baud) {
+void FalconBMSArduinoConnector::begin(Stream &serial, uint32_t baud)
+{
   _serial = &serial;
   // Do NOT call begin() on _serial here
   // Do NOT wait for serial connection here
@@ -29,49 +30,56 @@ void FalconBMSArduinoConnector::begin(Stream& serial, uint32_t baud) {
 //  // connected = true;
 // }
 
-bool FalconBMSArduinoConnector::isConnected() {
+bool FalconBMSArduinoConnector::isConnected()
+{
   return connected;
 }
 
-void FalconBMSArduinoConnector::update() {
-  if (!connected && _serial->available()) {
+void FalconBMSArduinoConnector::update()
+{
+  if (!connected && _serial->available())
+  {
     byte incoming = _serial->read();
-    if (incoming == 0xA5) {
+    if (incoming == 0xA5)
+    {
       _serial->write(0x5A);
       connected = true;
-      lastSerialActivity = millis();    
+      lastSerialActivity = millis();
     }
-  } 
+  }
 
-  if (connected && millis() - lastSerialActivity > timeoutMs) {
+  if (connected && millis() - lastSerialActivity > timeoutMs)
+  {
     connected = false;
     _serial->write(0x5A);
   }
-  
 }
 
 // Fetch Data
-void FalconBMSArduinoConnector::getLightBits(int lb){
- switch(lb){
-      case 1:
-      sendCommand(0x01);
-      break;
-      case 2:
-      sendCommand(0x02);
-      break;
-      case 3:
-      sendCommand(0x03);
-      break;
-      // case 4:
-      // sendCommand(0x04);
-      // break;
-      default:
-      sendCommand(0x5A);
-      break;
- }
+void FalconBMSArduinoConnector::getLightBits(int lb)
+{
+  switch (lb)
+  {
+  case 1:
+    sendCommand(0x01);
+    break;
+  case 2:
+    sendCommand(0x02);
+    break;
+  case 3:
+    sendCommand(0x03);
+    break;
+  // case 4:
+  // sendCommand(0x04);
+  // break;
+  default:
+    sendCommand(0x5A);
+    break;
+  }
 }
 
-void FalconBMSArduinoConnector::getblinkBits(){
+void FalconBMSArduinoConnector::getblinkBits()
+{
   sendCommand(0x04);
 }
 
@@ -80,11 +88,13 @@ void FalconBMSArduinoConnector::getDED()
   sendCommand(0x05);
 }
 
-void FalconBMSArduinoConnector::getFuelFlow(){
+void FalconBMSArduinoConnector::getFuelFlow()
+{
   sendCommand(0x06);
 }
 
-void FalconBMSArduinoConnector::getInstrLight(){
+void FalconBMSArduinoConnector::getInstrLight()
+{
   sendCommand(0x07);
 }
 void FalconBMSArduinoConnector::getPFL()
@@ -92,186 +102,227 @@ void FalconBMSArduinoConnector::getPFL()
   sendCommand(0x08);
 }
 
-void FalconBMSArduinoConnector::getChaffFlareCount() {
+void FalconBMSArduinoConnector::getChaffFlareCount()
+{
   sendCommand(0x09);
   sendCommand(0x10);
 }
-void FalconBMSArduinoConnector::getFloodConsole(){
+void FalconBMSArduinoConnector::getFloodConsole()
+{
   sendCommand(0x11);
 }
 
-void FalconBMSArduinoConnector::getRPM(){
+void FalconBMSArduinoConnector::getRPM()
+{
   sendCommand(0x12);
 }
-void FalconBMSArduinoConnector::getECMBits() {
+void FalconBMSArduinoConnector::getECMBits()
+{
   sendCommand(0x13);
 }
 
-void FalconBMSArduinoConnector::getOilPressure(){
+void FalconBMSArduinoConnector::getOilPressure()
+{
   sendCommand(0x14);
 }
 
-void FalconBMSArduinoConnector::getOilPressure2(){
+void FalconBMSArduinoConnector::getOilPressure2()
+{
   sendCommand(0x15);
 }
 
-void FalconBMSArduinoConnector::getNozzlePos(){
+void FalconBMSArduinoConnector::getNozzlePos()
+{
   sendCommand(0x16);
 }
 
-void FalconBMSArduinoConnector::getNozzlePos2(){
+void FalconBMSArduinoConnector::getNozzlePos2()
+{
   sendCommand(0x17);
 }
 
-void FalconBMSArduinoConnector::getFTIT(){
+void FalconBMSArduinoConnector::getFTIT()
+{
   sendCommand(0x18);
 }
 
-void FalconBMSArduinoConnector::getFTIT2(){
+void FalconBMSArduinoConnector::getFTIT2()
+{
   sendCommand(0x19);
 }
 
-void FalconBMSArduinoConnector::getCabinAlt(){
+void FalconBMSArduinoConnector::getCabinAlt()
+{
   sendCommand(0x20);
 }
 
-void FalconBMSArduinoConnector::getKIAS(){
+void FalconBMSArduinoConnector::getKIAS()
+{
   sendCommand(0x21);
 }
 
-void FalconBMSArduinoConnector::getinternalFuel(){
+void FalconBMSArduinoConnector::getinternalFuel()
+{
   sendCommand(0x22);
 }
 
-void FalconBMSArduinoConnector::getexternalFuel(){
+void FalconBMSArduinoConnector::getexternalFuel()
+{
   sendCommand(0x23);
 }
 
-void FalconBMSArduinoConnector::getEPUFuel(){
+void FalconBMSArduinoConnector::getEPUFuel()
+{
   sendCommand(0x24);
 }
 
-void FalconBMSArduinoConnector::getHYDPress(){
+void FalconBMSArduinoConnector::getHYDPress()
+{
   sendCommand(0x25);
   sendCommand(0x26);
 }
 
-void FalconBMSArduinoConnector::getCMDSMode(){
+void FalconBMSArduinoConnector::getCMDSMode()
+{
   sendCommand(0x27);
-      //  CmdsOFF = 0,
-      //   CmdsSTBY = 1,
-      //   CmdsMAN = 2,
-      //   CmdsSEMI = 3,
-      //   CmdsAUTO = 4,
-      //   CmdsBYP = 5,
+  //  CmdsOFF = 0,
+  //   CmdsSTBY = 1,
+  //   CmdsMAN = 2,
+  //   CmdsSEMI = 3,
+  //   CmdsAUTO = 4,
+  //   CmdsBYP = 5,
 }
 
-void FalconBMSArduinoConnector::getuhfPreset(){
+void FalconBMSArduinoConnector::getuhfPreset()
+{
   sendCommand(0x28);
 }
 
-void FalconBMSArduinoConnector::getuhfFreq(){
+void FalconBMSArduinoConnector::getuhfFreq()
+{
   sendCommand(0x29);
 }
 
-void FalconBMSArduinoConnector::getSpeedBrake(){
+void FalconBMSArduinoConnector::getSpeedBrake()
+{
   sendCommand(0x30);
 }
 
-void FalconBMSArduinoConnector::getIFFMode1Digit1(){
+void FalconBMSArduinoConnector::getIFFMode1Digit1()
+{
   sendCommand(0x31);
 }
-void FalconBMSArduinoConnector::getIFFMode1Digit2(){
+void FalconBMSArduinoConnector::getIFFMode1Digit2()
+{
   sendCommand(0x32);
 }
-void FalconBMSArduinoConnector::getIFFMode3Digit1(){
+void FalconBMSArduinoConnector::getIFFMode3Digit1()
+{
   sendCommand(0x33);
 }
-void FalconBMSArduinoConnector::getIFFMode3Digit2(){
+void FalconBMSArduinoConnector::getIFFMode3Digit2()
+{
   sendCommand(0x34);
 }
 
-void FalconBMSArduinoConnector::getfwd(){
+void FalconBMSArduinoConnector::getfwd()
+{
   sendCommand(0x35);
 }
 
-void FalconBMSArduinoConnector::getaft(){
+void FalconBMSArduinoConnector::getaft()
+{
   sendCommand(0x36);
 }
 
-void FalconBMSArduinoConnector::gettotalFuel(){
+void FalconBMSArduinoConnector::gettotalFuel()
+{
   sendCommand(0x37);
 }
 
-void FalconBMSArduinoConnector::getdesiredCourse(){
+void FalconBMSArduinoConnector::getdesiredCourse()
+{
   sendCommand(0x38);
 }
-void FalconBMSArduinoConnector::getcourseDeviation(){
+void FalconBMSArduinoConnector::getcourseDeviation()
+{
   sendCommand(0x39);
 }
 
-void FalconBMSArduinoConnector::getdistanceToBeacon(){
-sendCommand(0x40);
+void FalconBMSArduinoConnector::getdistanceToBeacon()
+{
+  sendCommand(0x40);
 }
-void FalconBMSArduinoConnector::getbearingToBeacon(){
-sendCommand(0x41);
+void FalconBMSArduinoConnector::getbearingToBeacon()
+{
+  sendCommand(0x41);
 }
-//Packet handling
-void FalconBMSArduinoConnector::sendCommand(uint8_t commandByte) {
+
+void FalconBMSArduinoConnector::getSimStatus()
+{
+  sendCommand(0x42);
+}
+
+// Packet handling
+void FalconBMSArduinoConnector::sendCommand(uint8_t commandByte)
+{
   _serial->write(commandByte);
   waitForPacket();
 }
 
-void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_t len) {
+void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t *data, uint8_t len)
+{
 
-  switch (type) {
-    //LightBits
-    case 0x01:
-      memcpy(&lightBits,data,len);
-      checkLightBits();
+  switch (type)
+  {
+  // LightBits
+  case 0x01:
+    memcpy(&lightBits, data, len);
+    checkLightBits();
 
-      break;
-    case 0x02:
-      memcpy(&lightBits2,data,len);
-      checkLightBits2();
-      break;
-    case 0x03:
-      memcpy(&lightBits3,data,len);
-      checkLightBits3();
-      break;
-    case 0x04:
-      memcpy(&blinkBits,data,len);
-      checkBlinkBits();
-      break;
-    case 0x05:
-      decodeDED(data,len);
-      break;
-    case 0x06:
-      memcpy(&fuelFlow,data,sizeof(float));
-      break;
-    case 0x07:
-      memcpy(&instrLight,data,len);
-      setInstrLights();
-      break;
-    case 0x08:
-      decodePFL(data,len);
     break;
-    case 0x09:
-      memcpy(&chaffCount,data,sizeof(float));
+  case 0x02:
+    memcpy(&lightBits2, data, len);
+    checkLightBits2();
     break;
-    case 0x10:
-      memcpy(&flareCount,data,sizeof(float));
+  case 0x03:
+    memcpy(&lightBits3, data, len);
+    checkLightBits3();
     break;
-    case 0x11:
-      //floodconsoleLights
-      memcpy(&floodConsole,data,len);
-      setFloodConsole();
+  case 0x04:
+    memcpy(&blinkBits, data, len);
+    checkBlinkBits();
     break;
-    case 0x12:
-      memcpy(&rpm,data,sizeof(float));
+  case 0x05:
+    decodeDED(data, len);
     break;
-    case 0x13:
-      for (uint8_t i = 0; i < 4; i++) {
+  case 0x06:
+    memcpy(&fuelFlow, data, sizeof(float));
+    break;
+  case 0x07:
+    memcpy(&instrLight, data, len);
+    setInstrLights();
+    break;
+  case 0x08:
+    decodePFL(data, len);
+    break;
+  case 0x09:
+    memcpy(&chaffCount, data, sizeof(float));
+    break;
+  case 0x10:
+    memcpy(&flareCount, data, sizeof(float));
+    break;
+  case 0x11:
+    // floodconsoleLights
+    memcpy(&floodConsole, data, len);
+    setFloodConsole();
+    break;
+  case 0x12:
+    memcpy(&rpm, data, sizeof(float));
+    break;
+  case 0x13:
+    for (uint8_t i = 0; i < 4; i++)
+    {
       ecm[i] =
           ((uint32_t)data[i * 4 + 0]) |
           ((uint32_t)data[i * 4 + 1] << 8) |
@@ -279,120 +330,129 @@ void FalconBMSArduinoConnector::handlePacket(uint8_t type, uint8_t* data, uint8_
           ((uint32_t)data[i * 4 + 3] << 24);
     }
     break;
-    case 0x14:
-      memcpy(&oilPress,data,sizeof(float));
+  case 0x14:
+    memcpy(&oilPress, data, sizeof(float));
     break;
-    case 0x15:
-      memcpy(&oilPress2,data,sizeof(float));
+  case 0x15:
+    memcpy(&oilPress2, data, sizeof(float));
     break;
-    case 0x16:
-      memcpy(&nozzlePos,data,sizeof(float));
+  case 0x16:
+    memcpy(&nozzlePos, data, sizeof(float));
     break;
-    case 0x17:
-      memcpy(&nozzlePos2,data,sizeof(float));
+  case 0x17:
+    memcpy(&nozzlePos2, data, sizeof(float));
     break;
-    case 0x18:
-      memcpy(&ftit,data,sizeof(float));
+  case 0x18:
+    memcpy(&ftit, data, sizeof(float));
     break;
-    case 0x19:
-      memcpy(&ftit2,data,sizeof(float));
+  case 0x19:
+    memcpy(&ftit2, data, sizeof(float));
     break;
-    case 0x20:
-      memcpy(&cabinAlt,data,sizeof(float));
+  case 0x20:
+    memcpy(&cabinAlt, data, sizeof(float));
     break;
-    case 0x21:
-      memcpy(&kias,data,sizeof(float));
+  case 0x21:
+    memcpy(&kias, data, sizeof(float));
     break;
-    case 0x22:
-      memcpy(&internalFuel,data,sizeof(float));
+  case 0x22:
+    memcpy(&internalFuel, data, sizeof(float));
     break;
-    case 0x23:
-      memcpy(&externalFuel,data,sizeof(float));
+  case 0x23:
+    memcpy(&externalFuel, data, sizeof(float));
     break;
-    case 0x24:
-      memcpy(&epuFuel,data,sizeof(float));
+  case 0x24:
+    memcpy(&epuFuel, data, sizeof(float));
     break;
-    case 0x25:
-      memcpy(&hydPressA,data,sizeof(float));
+  case 0x25:
+    memcpy(&hydPressA, data, sizeof(float));
     break;
-    case 0x26:
-      memcpy(&hydPressB,data,sizeof(float));
+  case 0x26:
+    memcpy(&hydPressB, data, sizeof(float));
     break;
-    case 0x27:
-      memcpy(&cmdsMode,data,sizeof(int));
+  case 0x27:
+    memcpy(&cmdsMode, data, sizeof(int));
     break;
-    case 0x28:
-      memcpy(&uhfPreset,data,sizeof(int));
-      
+  case 0x28:
+    memcpy(&uhfPreset, data, sizeof(int));
+
     break;
-    case 0x29:
-      memcpy(&uhfFreq,data,sizeof(long));
+  case 0x29:
+    memcpy(&uhfFreq, data, sizeof(long));
     break;
-    case 0x30:
-      memcpy(&speedBrake,data,sizeof(float));
+  case 0x30:
+    memcpy(&speedBrake, data, sizeof(float));
     break;
-    case 0x31:
-       memcpy(&IFFMode1Digit1_byte,data,sizeof(byte));
-        IFFMode1Digit1 = (int)IFFMode1Digit1_byte;
+  case 0x31:
+    memcpy(&IFFMode1Digit1_byte, data, sizeof(byte));
+    IFFMode1Digit1 = (int)IFFMode1Digit1_byte;
     break;
-    case 0x32:
-       memcpy(&IFFMode1Digit2_byte,data,sizeof(byte));
-        IFFMode1Digit2 = (int)IFFMode1Digit2_byte;
+  case 0x32:
+    memcpy(&IFFMode1Digit2_byte, data, sizeof(byte));
+    IFFMode1Digit2 = (int)IFFMode1Digit2_byte;
     break;
-    case 0x33:
-       memcpy(&IFFMode3Digit1_byte,data,sizeof(byte));
-        IFFMode3Digit1 = (int)IFFMode3Digit1_byte;
+  case 0x33:
+    memcpy(&IFFMode3Digit1_byte, data, sizeof(byte));
+    IFFMode3Digit1 = (int)IFFMode3Digit1_byte;
     break;
-    case 0x34:
-       memcpy(&IFFMode3Digit2_byte,data,sizeof(byte));
-        IFFMode3Digit2 = (int)IFFMode3Digit2_byte;
+  case 0x34:
+    memcpy(&IFFMode3Digit2_byte, data, sizeof(byte));
+    IFFMode3Digit2 = (int)IFFMode3Digit2_byte;
     break;
-    case 0x35:
-      memccpy(&fwd,data,sizeof(float),sizeof(float));
+  case 0x35:
+    memccpy(&fwd, data, sizeof(float), sizeof(float));
     break;
-    case 0x36:
-      memccpy(&aft,data,sizeof(float),sizeof(float));
+  case 0x36:
+    memccpy(&aft, data, sizeof(float), sizeof(float));
     break;
-    case 0x37:
-      memccpy(&totalFuel,data,sizeof(float),sizeof(float));
+  case 0x37:
+    memccpy(&totalFuel, data, sizeof(float), sizeof(float));
     break;
-    case 0x38:
-      memccpy(&desiredCourse,data,sizeof(float),sizeof(float));
+  case 0x38:
+    memccpy(&desiredCourse, data, sizeof(float), sizeof(float));
     break;
-    case 0x39:
-      memccpy(&courseDeviation,data,sizeof(float),sizeof(float));
+  case 0x39:
+    memccpy(&courseDeviation, data, sizeof(float), sizeof(float));
     break;
-    case 0x40:
-      memccpy(&distanceToBearing,data,sizeof(float),sizeof(float));
+  case 0x40:
+    memccpy(&distanceToBearing, data, sizeof(float), sizeof(float));
     break;
-    case 0x41:
-      memccpy(&bearingToBearing,data,sizeof(float),sizeof(float));
+  case 0x41:
+    memccpy(&bearingToBearing, data, sizeof(float), sizeof(float));
     break;
-    case 0xA5: // Handshake byte?
-      _serial->write(0x5A);
-      connected = true;
-      lastSerialActivity = millis(); 
-      break;
-    default: {
-      _serial->write(0x5A);
-      break;
-    }
+  case 0x42:
+    memcpy(&simStatus, data, sizeof(uint32_t));
+    break;
+  case 0xA5: // Handshake byte?
+    _serial->write(0x5A);
+    connected = true;
+    lastSerialActivity = millis();
+    break;
+  default:
+  {
+    _serial->write(0x5A);
+    break;
+  }
   }
   lastSerialActivity = millis();
   connected = true;
 }
 
-void FalconBMSArduinoConnector::waitForPacket(){
+void FalconBMSArduinoConnector::waitForPacket()
+{
   unsigned long start = millis();
   isReading = false;
   idx = 0;
 
-  while (millis() - start < timeoutMs) {
-    if (_serial->available()) {
+  while (millis() - start < timeoutMs)
+  {
+    if (_serial->available())
+    {
       uint8_t b = _serial->read();
 
-      if (!isReading) {
-        if (b == 0xAA) {
+      if (!isReading)
+      {
+        if (b == 0xAA)
+        {
           isReading = true;
           idx = 0;
         }
@@ -401,28 +461,34 @@ void FalconBMSArduinoConnector::waitForPacket(){
 
       buffer[idx++] = b;
 
-      if (idx >= 2) {
+      if (idx >= 2)
+      {
         uint8_t expectedLen = buffer[1];
-        if (idx == 2 + expectedLen + 1) {
+        if (idx == 2 + expectedLen + 1)
+        {
           // Full packet received
           uint8_t type = buffer[0];
           uint8_t len = buffer[1];
-          uint8_t* data = &buffer[2];
+          uint8_t *data = &buffer[2];
           uint8_t checksum = buffer[2 + len];
 
           uint8_t sum = type + len;
-          for (int i = 0; i < len; i++) sum += data[i];
+          for (int i = 0; i < len; i++)
+            sum += data[i];
 
-          if ((sum & 0xFF) == checksum) {
+          if ((sum & 0xFF) == checksum)
+          {
             handlePacket(type, data, len);
             lastSerialActivity = millis();
             return;
-          } else {
-              sendCommand(0x99);
-              connected = false;
-              return;
           }
+          else
+          {
             sendCommand(0x99);
+            connected = false;
+            return;
+          }
+          sendCommand(0x99);
           return;
         }
       }
@@ -432,128 +498,147 @@ void FalconBMSArduinoConnector::waitForPacket(){
 
 // Assign Data
 
-int FalconBMSArduinoConnector::getECMStatus(int ecmLight){
+int FalconBMSArduinoConnector::getECMStatus(int ecmLight)
+{
 
-uint32_t light = ecm[ecmLight];
-switch(light){
+  uint32_t light = ecm[ecmLight];
+  switch (light)
+  {
   case ECM_UNPRESSED_NO_LIT:
-  return 0;
-  break;
+    return 0;
+    break;
   case ECM_UNPRESSED_ALL_LIT:
-  return 1;
-  break;
+    return 1;
+    break;
   case ECM_PRESSED_NO_LIT:
-  return 2;
-  break;
+    return 2;
+    break;
   case ECM_PRESSED_STANDBY:
-  return 3;
-  break;
+    return 3;
+    break;
   case ECM_PRESSED_ACTIVE:
-  return 4;
-  break;
+    return 4;
+    break;
   case ECM_PRESSED_TRANSMIT:
-  return 5;
-  break;
+    return 5;
+    break;
   case ECM_PRESSED_FAIL:
-  return 6;
-  break;
+    return 6;
+    break;
   case ECM_PRESSED_ALL_LIT:
-  return 7;
-  break;
+    return 7;
+    break;
   default:
-  return 0;
-  break;
+    return 0;
+    break;
+  }
 }
 
-}
-
-void FalconBMSArduinoConnector::setInstrLights(){
-  //check instrlights  0 = off, 1 = dim , 2 = bright
-  if(instrLight  == INSTR_LIGHT_DIM){
+void FalconBMSArduinoConnector::setInstrLights()
+{
+  // check instrlights  0 = off, 1 = dim , 2 = bright
+  if (instrLight == INSTR_LIGHT_DIM)
+  {
     instrLightStatus = 1;
-  } else if(instrLight  == INSTR_LIGHT_BRT){
+  }
+  else if (instrLight == INSTR_LIGHT_BRT)
+  {
     instrLightStatus = 2;
-  }else {
+  }
+  else
+  {
     instrLightStatus = 0;
   }
   InstrumentLighting = instrLightStatus;
 }
 
-int FalconBMSArduinoConnector::getInstrLightStatus(){
+int FalconBMSArduinoConnector::getInstrLightStatus()
+{
   return instrLightStatus;
 }
 
-void FalconBMSArduinoConnector::setFloodConsole(){
+void FalconBMSArduinoConnector::setFloodConsole()
+{
   // if(floodConsole == FLOOD_CONSOLE_OFF){
   //   floodConsoleStatus = 0;
-  // } 
-  switch (floodConsole){
-        case FLOOD_CONSOLE_OFF:
-          floodConsoleStatus =0;
-        break;
-        case FLOOD_CONSOLE_1:
-          floodConsoleStatus =1;
-        break;
-        case FLOOD_CONSOLE_2:
-          floodConsoleStatus =2;
-        break;
-        case FLOOD_CONSOLE_3:
-          floodConsoleStatus =3;
-        break;
-        case FLOOD_CONSOLE_4:
-          floodConsoleStatus =4;
-        break;
-        case FLOOD_CONSOLE_5:
-          floodConsoleStatus =5;
-        break;
-        case FLOOD_CONSOLE_6:
-          floodConsoleStatus =6;
-        break;
-        default:
-        floodConsoleStatus =0;
+  // }
+  switch (floodConsole)
+  {
+  case FLOOD_CONSOLE_OFF:
+    floodConsoleStatus = 0;
+    break;
+  case FLOOD_CONSOLE_1:
+    floodConsoleStatus = 1;
+    break;
+  case FLOOD_CONSOLE_2:
+    floodConsoleStatus = 2;
+    break;
+  case FLOOD_CONSOLE_3:
+    floodConsoleStatus = 3;
+    break;
+  case FLOOD_CONSOLE_4:
+    floodConsoleStatus = 4;
+    break;
+  case FLOOD_CONSOLE_5:
+    floodConsoleStatus = 5;
+    break;
+  case FLOOD_CONSOLE_6:
+    floodConsoleStatus = 6;
+    break;
+  default:
+    floodConsoleStatus = 0;
   }
   FloodConsoleLighting = floodConsoleStatus;
 }
 
-int FalconBMSArduinoConnector::getFloodConsoleStatus(){
+int FalconBMSArduinoConnector::getFloodConsoleStatus()
+{
   return floodConsoleStatus;
 }
 
-void FalconBMSArduinoConnector::decodePFL(uint8_t* data, uint8_t len) {
-  if (len < 120) return; // Must be 5 lines x 24 chars
+void FalconBMSArduinoConnector::decodePFL(uint8_t *data, uint8_t len)
+{
+  if (len < 120)
+    return; // Must be 5 lines x 24 chars
 
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 5; i++)
+  {
     memcpy(pflLines[i], &data[i * 24], 24);
     pflLines[i][24] = '\0'; // Null-terminate
   }
-
 }
 
-void FalconBMSArduinoConnector::decodeDED(uint8_t* data, uint8_t len) {
-  if (len < 120) return; // Must be 5 lines x 24 chars
+void FalconBMSArduinoConnector::decodeDED(uint8_t *data, uint8_t len)
+{
+  if (len < 120)
+    return; // Must be 5 lines x 24 chars
 
-  for (int i = 0; i < 5; i++) {
+  for (int i = 0; i < 5; i++)
+  {
     memcpy(dedLines[i], &data[i * 24], 24);
     dedLines[i][24] = '\0'; // Null-terminate
   }
-
 }
 
-
-void FalconBMSArduinoConnector::checkAllLights(){
-    getLightBits(1);
-    getLightBits(2);
-    getLightBits(3);
-    getblinkBits(); //blink
-    getECMBits();
+void FalconBMSArduinoConnector::checkAllLights()
+{
+  getLightBits(1);
+  getLightBits(2);
+  getLightBits(3);
+  getblinkBits(); // blink
+  getECMBits();
 }
 
-void FalconBMSArduinoConnector::checkLightBits() {
+void FalconBMSArduinoConnector::checkLightBits()
+{
 
-  if(lightBits == 0xBFFFFFEF){
-      isAllLampBits = true;
-  } else {
-      isAllLampBits = false;
+  if (lightBits == 0xBFFFFFEF)
+  {
+    isAllLampBits = true;
+  }
+  else
+  {
+    isAllLampBits = false;
   }
 
   _bits[0] = lightBits & MasterCaution;
@@ -591,7 +676,8 @@ void FalconBMSArduinoConnector::checkLightBits() {
   _bits[32] = lightBits & AllLampBitsOn;
 }
 
-void FalconBMSArduinoConnector::checkLightBits2() {
+void FalconBMSArduinoConnector::checkLightBits2()
+{
   _bits2[0] = lightBits2 & HandOff;
   _bits2[1] = lightBits2 & Launch;
   _bits2[2] = lightBits2 & PriMode;
@@ -626,17 +712,18 @@ void FalconBMSArduinoConnector::checkLightBits2() {
   _bits2[31] = lightBits2 & ENGINE;
 }
 
-void FalconBMSArduinoConnector::checkLightBits3() {
-  _bits3[0]  = lightBits3 & FlcsPmg;
-  _bits3[1]  = lightBits3 & MainGen;
-  _bits3[2]  = lightBits3 & StbyGen;
-  _bits3[3]  = lightBits3 & EpuGen;
-  _bits3[4]  = lightBits3 & EpuPmg;
-  _bits3[5]  = lightBits3 & ToFlcs;
-  _bits3[6]  = lightBits3 & FlcsRly;
-  _bits3[7]  = lightBits3 & BatFail;
-  _bits3[8]  = lightBits3 & Hydrazine;
-  _bits3[9]  = lightBits3 & Air;
+void FalconBMSArduinoConnector::checkLightBits3()
+{
+  _bits3[0] = lightBits3 & FlcsPmg;
+  _bits3[1] = lightBits3 & MainGen;
+  _bits3[2] = lightBits3 & StbyGen;
+  _bits3[3] = lightBits3 & EpuGen;
+  _bits3[4] = lightBits3 & EpuPmg;
+  _bits3[5] = lightBits3 & ToFlcs;
+  _bits3[6] = lightBits3 & FlcsRly;
+  _bits3[7] = lightBits3 & BatFail;
+  _bits3[8] = lightBits3 & Hydrazine;
+  _bits3[9] = lightBits3 & Air;
   _bits3[10] = lightBits3 & Elec_Fault;
   _bits3[11] = lightBits3 & Lef_Fault;
   _bits3[12] = lightBits3 & OnGround3;
@@ -658,7 +745,8 @@ void FalconBMSArduinoConnector::checkLightBits3() {
   _bits3[28] = lightBits3 & Inlet_Icing;
 }
 
-void FalconBMSArduinoConnector::checkBlinkBits() {
+void FalconBMSArduinoConnector::checkBlinkBits()
+{
   _blinkBits[0] = blinkBits & B_OuterMarker;
   _blinkBits[1] = blinkBits & B_MiddleMarker;
   _blinkBits[2] = blinkBits & B_PROBEHEAT;
@@ -674,9 +762,9 @@ void FalconBMSArduinoConnector::checkBlinkBits() {
   _blinkBits[12] = blinkBits & B_ECM_Oper;
 }
 
-
 // Individual accessors
-#define DEFINE_GETTER(name, index) bool FalconBMSArduinoConnector::name() { return _bits[index]; }
+#define DEFINE_GETTER(name, index) \
+  bool FalconBMSArduinoConnector::name() { return _bits[index]; }
 
 DEFINE_GETTER(isMasterCaution, 0)
 DEFINE_GETTER(isTF, 1)
@@ -712,7 +800,8 @@ DEFINE_GETTER(isAutoPilotOn, 30)
 DEFINE_GETTER(isTFRSTBY, 31)
 DEFINE_GETTER(isAllLampBitsOn, 32)
 
-#define DEFINE_GETTER2(name, index) bool FalconBMSArduinoConnector::name() { return _bits2[index]; }
+#define DEFINE_GETTER2(name, index) \
+  bool FalconBMSArduinoConnector::name() { return _bits2[index]; }
 
 DEFINE_GETTER2(isHandOff, 0)
 DEFINE_GETTER2(isLaunch, 1)
@@ -747,7 +836,8 @@ DEFINE_GETTER2(isTFREngaged, 29)
 DEFINE_GETTER2(isGearHandle, 30)
 DEFINE_GETTER2(isEngine, 31)
 
-#define DEFINE_GETTER3(name, index) bool FalconBMSArduinoConnector::name() { return _bits3[index]; }
+#define DEFINE_GETTER3(name, index) \
+  bool FalconBMSArduinoConnector::name() { return _bits3[index]; }
 
 DEFINE_GETTER3(isFlcsPmg, 0)
 DEFINE_GETTER3(isMainGen, 1)
@@ -779,7 +869,8 @@ DEFINE_GETTER3(isNLGWOW, 26)
 DEFINE_GETTER3(isATFNotEngaged, 27)
 DEFINE_GETTER3(isInletIcing, 28)
 
-#define DEFINE_BLINK_GETTER(name, index) bool FalconBMSArduinoConnector::name() { return _blinkBits[index]; }
+#define DEFINE_BLINK_GETTER(name, index) \
+  bool FalconBMSArduinoConnector::name() { return _blinkBits[index]; }
 
 DEFINE_BLINK_GETTER(isOuterMarkerBlinking, 0)
 DEFINE_BLINK_GETTER(isMiddleMarkerBlinking, 1)
@@ -795,4 +886,7 @@ DEFINE_BLINK_GETTER(isJFSOnSlowBlinking, 10)
 DEFINE_BLINK_GETTER(isJFSOnFastBlinking, 11)
 DEFINE_BLINK_GETTER(isECMOperBlinking, 12)
 
-
+bool FalconBMSArduinoConnector::isIn3D()
+{
+  return (simStatus & SimStatusBits::STATUS_IN_3D) != 0;
+}
