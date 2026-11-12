@@ -9,7 +9,12 @@
 #include "EcmBits.h"
 #include "InstrLight.h"
 #include "SimStatusBits.h"
+#include "FBAC_Commands.h"
+// NOTE: FBAC_Config.h defines global display objects. Include this library from
+// a single .ino/.cpp file only, or you will get duplicate-symbol link errors.
 #include "FBAC_Config.h"
+
+#define FBAC_MAX_ECM 5
 
 class FalconBMSArduinoConnector
 {
@@ -21,8 +26,15 @@ public:
   bool isConnected();
   unsigned long lastSerialActivity;
 
+  // Protocol version reported by the PC app: 0 = not yet known, 1 = legacy (FBAC <= 0.5), 2+ = current
+  uint8_t protocolVersion;
+
   void begin(Stream &serial = Serial, uint32_t baud = 115200);
   // void begin(HardwareSerial& serial = Serial, uint32_t baud = 115200);
+
+  // How long a single request waits for its reply (default 250 ms).
+  // Raise it if you run the link at a low baud rate.
+  void setRequestTimeout(unsigned long ms) { requestTimeoutMs = ms; }
 
   void update(); // Call in loop()
   void checkAllLights();
@@ -92,7 +104,7 @@ public:
   float rpm;
 
   // ECM
-  uint32_t ecm[4];
+  uint32_t ecm[FBAC_MAX_ECM];
 
   // Oil Press
   float oilPress;
@@ -117,11 +129,11 @@ public:
   float hydPressB;
 
   // CMDS Mode
-  int cmdsMode;
+  int32_t cmdsMode;
 
   // UHF Comms
-  int uhfPreset;
-  long uhfFreq;
+  int32_t uhfPreset;
+  int32_t uhfFreq;
 
   // InstrLight Status
   int getInstrLightStatus(); // returns status 0 = off 1 = dim 2 = brt
@@ -176,8 +188,8 @@ public:
   bool isCabinPress();
   bool isAutoPilotOn();
   bool isTFRSTBY();
-  bool isAllLampBitsOn(); // Not Sure if these are working
-  bool isAllLampBits;     // trying to check ALl LampBits
+  bool isAllLampBitsOn(); // true while the cockpit lamp test is running
+  bool isAllLampBits;     // same value, kept for existing sketches
 
   // LightBits2-related getters
   bool isHandOff();
@@ -279,12 +291,29 @@ private:
   byte IFFMode3Digit1_byte;
   byte IFFMode3Digit2_byte;
 
-  uint8_t buffer[134];
-  uint8_t idx;
-  bool isReading;
+  // [type][len][data up to 128][checksum]
+  uint8_t buffer[131];
 
   bool connected;
-  const unsigned long timeoutMs = 3000;
+  uint8_t consecutiveFailures;
+  unsigned long lastPingMs;
+  unsigned long requestTimeoutMs;
+  static const unsigned long keepAliveMs = 3000;   // ping the PC if idle this long
+  static const unsigned long reconnectPingMs = 1000; // ping interval while disconnected
+  static const uint8_t maxFailures = 5;            // failed requests before disconnect
+
+  enum RequestResult : uint8_t
+  {
+    REQ_FAIL = 0,
+    REQ_OK = 1,
+    REQ_UNSUPPORTED = 2
+  };
+
+  RequestResult request(uint8_t cmd, bool force = false);
+  RequestResult waitForPacket(uint8_t expectedType);
+  void drainInput();
+  void markDisconnected();
+  static bool copyField(void *dst, size_t size, const uint8_t *data, uint8_t len);
 
   void handlePacket(uint8_t type, uint8_t *data, uint8_t len);
 
@@ -294,8 +323,6 @@ private:
   void checkBlinkBits();
   void setInstrLights();
   void setFloodConsole();
-  void sendCommand(uint8_t commandByte);
-  void waitForPacket();
   void decodeDED(uint8_t *data, uint8_t len);
   void decodePFL(uint8_t *data, uint8_t len);
 
