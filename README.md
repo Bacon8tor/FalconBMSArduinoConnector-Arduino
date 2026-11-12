@@ -234,41 +234,68 @@ This library listens for incoming serial data in the Falcon BMS shared memory fo
 * Data Call: Make a data call like `bms.checkAllLights();` or `bms.getDED()` this is spilt up, to not call unneccessary data, call what you need. 
 * Ensure your PC-side application is sending compatible packets
 
-## All Configured Variables
+## Serial Protocol (v2)
 
-| Case | Description                       | Field Name              | Type                  |
-| ---- | --------------------------------- | ----------------------- | --------------------- |
-| 0x01 | LightBits                         | `lightBits`             | `uint32_t`            |
-| 0x02 | LightBits2                        | `lightBits2`            | `uint32_t`            |
-| 0x03 | LightBits3                        | `lightBits3`            | `uint32_t`            |
-| 0x04 | BlinkBits                         | `blinkBits`             | `uint32_t`            |
-| 0x05 | DED Lines (normalized)            | `DEDLines`, `Invert`    | `char[5][26]`, `bool` |
-| 0x06 | Fuel Flow                         | `fuelFlow`              | `float`               |
-| 0x07 | Instrument Light Level            | `instrLight`            | `uint8_t`             |
-| 0x08 | PFL Lines (normalized)            | `PFLLines`, `PFLInvert` | `char[5][26]`, `bool` |
-| 0x09 | Chaff Count                       | `ChaffCount`            | `float`               |
-| 0x10 | Flare Count                       | `FlareCount`            | `float`               |
-| 0x11 | Flood Console Brightness (unused) | *(hardcoded to 0x00)*   | `-`                   |
-| 0x12 | RPM                               | `rpm`                   | `float`               |
-| 0x13 | ECM Bits                          | `ecmBits[4]`            | `uint32_t[4]`         |
-| 0x14 | Oil Pressure 1                    | `oilPressure`           | `float`               |
-| 0x15 | Oil Pressure 2                    | `oilPressure2`          | `float`               |
-| 0x16 | Nozzle Position 1                 | `nozzlePos`             | `float`               |
-| 0x17 | Nozzle Position 2                 | `nozzlePos2`            | `float`               |
-| 0x18 | FTIT 1                            | `ftit`                  | `float`               |
-| 0x19 | FTIT 2                            | `ftit2`                 | `float`               |
-| 0x20 | Cabin Altitude                    | `cabinAlt`              | `float`               |
-| 0x21 | KIAS (Speed)                      | `kias`                  | `float`               |
-| 0x22 | Internal Fuel                     | `internalFuel`          | `float`               |
-| 0x23 | External Fuel                     | `externalFuel`          | `float`               |
-| 0x24 | EPU Fuel                          | `epuFuel`               | `float`               |
-| 0x25 | Hydraulic Pressure A              | `hydPressureA`          | `float`               |
-| 0x26 | Hydraulic Pressure B              | `hydPressureB`          | `float`               |
-| 0x27 | CMDS Mode                         | `cmdsMode`              | `int`                 |
-| 0x28 | UHF Preset                        | `BupUhfPreset`          | `int`                 |
-| 0x29 | UHF Frequency                     | `BupUhfFreq`            | `int` or `long`       |
-| 0x30 | Speed Brake                     | `speedBrake`            | `float`       |
-| 0x42 | In3d                             | `in3d`                 | `bool`        |
+115200 baud by default, 8N1, no flow control. The Arduino asks and the PC answers.
+
+* **Handshake:** the PC sends `0xA5` every 250 ms (for up to 4 s) until the Arduino replies `0x5A`. The retries cover boards that reset when the port opens (Uno/Nano).
+* **Request:** the Arduino sends a single command byte (table below).
+* **Response:** the PC sends `[0xAA][type][len][data...][checksum]`. `type` equals the command, multi-byte values are little-endian, and `checksum = (type + len + sum(data)) & 0xFF`.
+* **Unknown command:** the PC replies with type `0x00`.
+* **No BMS data:** the PC still replies, with the correct type and length and all bytes zero.
+* **Version check:** after the handshake the library sends `0x43` once. An older PC app answers `0x00`, so the library falls back to protocol v1 and requests lights one word at a time.
+* **Timeouts:** each request waits up to 250 ms (`bms.setRequestTimeout(ms)` to change). After 5 failed requests in a row, `isConnected()` turns false. The library then pings (`0x0F`) once a second to reconnect, and also answers a new handshake.
+* Don't `Serial.print()` debug output on the port the PC app uses. The PC reads those bytes as commands.
+
+| Cmd  | Description                       | Arduino field                    | Payload               |
+| ---- | --------------------------------- | -------------------------------- | --------------------- |
+| 0x01 | LightBits                         | `isMasterCaution()` …            | `uint32_t`            |
+| 0x02 | LightBits2                        | `isHandOff()` …                  | `uint32_t`            |
+| 0x03 | LightBits3                        | `isFlcsPmg()` …                  | `uint32_t`            |
+| 0x04 | BlinkBits                         | `is…Blinking()`                  | `uint32_t`            |
+| 0x05 | DED Lines (normalized)            | `dedLines[5]`                    | 5 × 24 chars          |
+| 0x06 | Fuel Flow                         | `fuelFlow`                       | `float`               |
+| 0x07 | Instrument Light Level            | `getInstrLightStatus()`          | `uint8_t`             |
+| 0x08 | PFL Lines (normalized)            | `pflLines[5]`                    | 5 × 24 chars          |
+| 0x09 | Chaff Count                       | `chaffCount`                     | `float`               |
+| 0x0F | Ping                              | –                                | `0xAB`                |
+| 0x10 | Flare Count                       | `flareCount`                     | `float`               |
+| 0x11 | Flood Console Brightness          | `getFloodConsoleStatus()`        | `uint8_t` (0-6)       |
+| 0x12 | RPM                               | `rpm`                            | `float`               |
+| 0x13 | ECM Bits                          | `ecm[5]`, `getECMStatus(i)`      | 5 × `uint32_t`        |
+| 0x14 | Oil Pressure 1                    | `oilPress`                       | `float`               |
+| 0x15 | Oil Pressure 2                    | `oilPress2`                      | `float`               |
+| 0x16 | Nozzle Position 1                 | `nozzlePos`                      | `float`               |
+| 0x17 | Nozzle Position 2                 | `nozzlePos2`                     | `float`               |
+| 0x18 | FTIT 1                            | `ftit`                           | `float`               |
+| 0x19 | FTIT 2                            | `ftit2`                          | `float`               |
+| 0x20 | Cabin Altitude                    | `cabinAlt`                       | `float`               |
+| 0x21 | KIAS (Speed)                      | `kias`                           | `float`               |
+| 0x22 | Internal Fuel                     | `internalFuel`                   | `float`               |
+| 0x23 | External Fuel                     | `externalFuel`                   | `float`               |
+| 0x24 | EPU Fuel                          | `epuFuel`                        | `float`               |
+| 0x25 | Hydraulic Pressure A              | `hydPressA`                      | `float`               |
+| 0x26 | Hydraulic Pressure B              | `hydPressB`                      | `float`               |
+| 0x27 | CMDS Mode                         | `cmdsMode`                       | `int32_t`             |
+| 0x28 | UHF Preset                        | `uhfPreset`                      | `int32_t`             |
+| 0x29 | UHF Frequency                     | `uhfFreq`                        | `int32_t`             |
+| 0x30 | Speed Brake                       | `speedBrake`                     | `float`               |
+| 0x31 | IFF Mode 1 Digit 1                | `IFFMode1Digit1`                 | `uint8_t`             |
+| 0x32 | IFF Mode 1 Digit 2                | `IFFMode1Digit2`                 | `uint8_t`             |
+| 0x33 | IFF Mode 3A Digit 1               | `IFFMode3Digit1`                 | `uint8_t`             |
+| 0x34 | IFF Mode 3A Digit 2               | `IFFMode3Digit2`                 | `uint8_t`             |
+| 0x35 | Fuel FWD                          | `fwd`                            | `float`               |
+| 0x36 | Fuel AFT                          | `aft`                            | `float`               |
+| 0x37 | Fuel Total                        | `totalFuel`                      | `float`               |
+| 0x38 | Desired Course                    | `desiredCourse`                  | `float`               |
+| 0x39 | Course Deviation                  | `courseDeviation`                | `float`               |
+| 0x40 | Distance To Beacon                | `distanceToBearing`              | `float`               |
+| 0x41 | Bearing To Beacon                 | `bearingToBearing`               | `float`               |
+| 0x42 | Sim Status (bit 0 = in 3D)        | `simStatus`, `isIn3D()`          | `uint32_t`            |
+| 0x43 | Protocol Version *(v2)*           | `protocolVersion`                | `[version, flags]`    |
+| 0x44 | All Lights *(v2)*                 | used by `checkAllLights()`       | 4 × `uint32_t` (LightBits, LightBits2, LightBits3, BlinkBits) + 5 × `uint32_t` ECM |
+
+The command IDs are defined in `FBAC_Commands.h` (Arduino) and in the `FbacCommand` enum in `ArduinoConnector.cs` (PC). Keep both in sync.
 
 ## Credits
 

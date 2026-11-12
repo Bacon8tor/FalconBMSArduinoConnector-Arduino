@@ -94,10 +94,12 @@ void setup()
       } while (u8g2_FuelFlow.nextPage());
     #endif
   #else
+  #ifdef FBAC_DED_1322
   u8g2_DED.setFont(SD1322_FONT); 
   u8g2_DED.clearBuffer();
   u8g2_DED.drawStr(0, 10, "Starting...");
   u8g2_DED.sendBuffer();
+  #endif
   #ifdef FBAC_FF_1306
   u8g2_FuelFlow.setFont(ffFont); 
   u8g2_FuelFlow.clearBuffer();
@@ -116,6 +118,7 @@ void setup()
 }
 
 
+#ifdef FBAC_FASTLED
 void updateCautionPanel() {
   if(bms.isAllLampBits){
     for(int i = 0; i < NUM_LEDS;i++){
@@ -158,7 +161,9 @@ void updateCautionPanel() {
   }
    FastLED.show();
 }
+#endif
 
+#ifdef FBAC_DED_1322
 void printDED() {
   uint8_t charHeight = u8g2_DED.getMaxCharHeight();
   uint8_t lineSpacing = 1;
@@ -185,6 +190,7 @@ void printDED() {
   u8g2_DED.sendBuffer();
 #endif
 }
+#endif
 
 #ifdef FBAC_FF_1306
 void setFuelFlowValue(float flow) {
@@ -250,7 +256,9 @@ void loop()
     bms.getFuelFlow();
     bms.getChaffFlareCount();
 
+    #ifdef FBAC_DED_1322
     printDED();
+    #endif
     #ifdef FBAC_FF_1306
      setFuelFlowValue(bms.fuelFlow);
      drawFF();
@@ -269,10 +277,12 @@ void loop()
       #endif
 
       #ifdef USE_PAGED_MODE
+      #ifdef FBAC_DED_1322
         u8g2_DED.firstPage();
         do {
           u8g2_DED.drawStr(0, 15, "NOT CONNECTED....");
         } while (u8g2_DED.nextPage());
+      #endif
       #ifdef FBAC_FF_1306
        u8g2_FuelFlow.firstPage();
         do {
@@ -284,9 +294,11 @@ void loop()
         } while (u8g2_FuelFlow.nextPage());
       #endif
       #else
+      #ifdef FBAC_DED_1322
       u8g2_DED.clearBuffer();
       u8g2_DED.drawStr(0, 15, "Not Connected....");
       u8g2_DED.sendBuffer();
+      #endif
 #ifdef FBAC_FF_1306
       u8g2_FuelFlow.setFont(ffFont); // Nice readable default font
       u8g2_FuelFlow.clearBuffer();

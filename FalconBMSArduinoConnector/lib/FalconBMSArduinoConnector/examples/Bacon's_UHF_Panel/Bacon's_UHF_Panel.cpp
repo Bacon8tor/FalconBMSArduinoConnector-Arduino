@@ -37,8 +37,8 @@ void displayUHF(long val1, int val2) {
   
   for (int i = 5; i >= 0; i--) {
     byte digit = number % 10;
-    Serial.println(digit);
-    lc.setDigit(0, i, digit, false);
+    // Do not Serial.print() here: Serial is the link to the PC app and any
+    // extra bytes are read as commands.
     // Add decimal point after third digit (i == 2)
     bool dp = (i == 2);  // dp = true only at position 2
     lc.setDigit(0, i, digit, dp);
